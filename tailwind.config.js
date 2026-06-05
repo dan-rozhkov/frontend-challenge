@@ -81,9 +81,19 @@ module.exports = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "tooltip-in": {
+          from: { opacity: "0", transform: "scale(0.96)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "tooltip-out": {
+          from: { opacity: "1", transform: "scale(1)" },
+          to: { opacity: "0", transform: "scale(0.96)" },
+        },
       },
       animation: {
         shimmer: "shimmer 2s linear infinite",
+        "tooltip-in": "tooltip-in 120ms ease-out",
+        "tooltip-out": "tooltip-out 100ms ease-in forwards",
       },
     },
   },

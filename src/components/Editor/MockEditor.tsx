@@ -6,8 +6,8 @@ export function MockEditor() {
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30">
-        <File className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center gap-2 h-12 shrink-0 px-4 border-b border-border bg-muted/30">
+        <File className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
         <span className="text-sm text-sidebar-foreground font-medium">
           mock-file.txt
         </span>

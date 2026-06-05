@@ -4,3 +4,9 @@ export { Textarea } from "./textarea";
 export { Panel } from "./panel";
 export { ScrollArea, ScrollBar } from "./scroll-area";
 export { ShimmerText } from "./shimmer-text";
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "./tooltip";

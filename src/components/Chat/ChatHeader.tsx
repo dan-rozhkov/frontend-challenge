@@ -12,9 +12,9 @@ export function ChatHeader() {
   }, [clearMessages]);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-sidebar-border">
+    <div className="flex items-center justify-between h-12 shrink-0 px-4 border-b border-sidebar-border">
       <div className="flex items-center gap-2">
-        <Bot className="h-5 w-5 text-brand" />
+        <Bot className="h-5 w-5 text-brand" strokeWidth={1.75} />
         <span className="text-sm font-semibold text-sidebar-foreground">
           AI Coding Agent
         </span>

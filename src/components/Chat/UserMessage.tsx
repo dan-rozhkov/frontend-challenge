@@ -1,7 +1,13 @@
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
 import type { UserMessage as UserMessageType } from "@/types/chat";
-import { Button, ShimmerText } from "@/components/ui";
+import {
+  Button,
+  ShimmerText,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui";
 import { Pencil, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { MessageEditor } from "./MessageEditor";
@@ -119,41 +125,48 @@ export function UserMessage({ message }: UserMessageProps) {
     );
   }
 
-  // --- Idle bubble with the actions sitting outside the card, in a row pinned
-  // to the right beneath it, styled like the feedback thumbs under agent
-  // messages. ---
+  // --- Idle bubble with the actions sitting inside the card, top-right of the
+  // message text. ---
   return (
-    <div>
-      <div className="rounded-lg border border-border bg-sidebar-accent px-3 pt-1.5 pb-2">
-        <span className="text-sm whitespace-pre-wrap text-sidebar-foreground">
+    <div className="rounded-lg border border-border bg-sidebar-accent px-3 pt-1.5 pb-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-sidebar-foreground">
           {message.content}
         </span>
-      </div>
-      <div className="mt-1.5 flex items-center justify-end gap-1 pr-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={startEdit}
-          disabled={isRollingBack}
-          aria-label="Edit message"
-          title="Edit message"
-          className={ACTION_BUTTON}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-        {affectedCount > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setConfirm("restore")}
-            disabled={isRollingBack}
-            aria-label="Restore to here"
-            title="Restore chat and file to this point"
-            className={ACTION_BUTTON}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </Button>
-        )}
+        <div className="-mr-1.5 mt-0.5 flex shrink-0 items-center gap-1">
+          {affectedCount > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setConfirm("restore")}
+                  disabled={isRollingBack}
+                  aria-label="Restore to here"
+                  className={ACTION_BUTTON}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Restore chat and file to this point</TooltipContent>
+            </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={startEdit}
+                disabled={isRollingBack}
+                aria-label="Edit message"
+                className={ACTION_BUTTON}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit message</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );

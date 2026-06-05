@@ -35,6 +35,10 @@ export function ChatInput({
     }
   }, []);
 
+  useEffect(() => {
+    if (!disabled) textareaRef.current?.focus();
+  }, [disabled]);
+
   const minHeight = MIN_LINES * metrics.lineHeight + metrics.padding;
   const maxHeight = MAX_LINES * metrics.lineHeight + metrics.padding;
 
@@ -104,7 +108,12 @@ export function ChatInput({
         />
         <div className="flex items-center justify-end px-2 pb-2 gap-2">
           {canInterrupt ? (
-            <Button variant="destructive" size="sm" onClick={onInterrupt}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onInterrupt}
+              className="bg-accent-hover text-foreground hover:bg-accent-hover"
+            >
               <Square className="h-3.5 w-3.5 fill-current" />
               Stop
             </Button>
@@ -116,7 +125,7 @@ export function ChatInput({
               disabled={!canSend}
               aria-label="Send"
             >
-              <ArrowUp className="h-4 w-4" />
+              <ArrowUp className="h-4 w-4" strokeWidth={1.75} />
             </Button>
           )}
         </div>

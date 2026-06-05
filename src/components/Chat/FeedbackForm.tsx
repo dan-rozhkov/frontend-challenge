@@ -1,8 +1,15 @@
 import { cn } from "@/lib/utils";
-import { Button, Panel, Textarea } from "@/components/ui";
+import {
+  Button,
+  Panel,
+  Textarea,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui";
 import { useChatStore } from "@/stores/chat-store";
 import type { MessageFeedback } from "@/types/chat";
-import { Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface FeedbackFormProps {
@@ -89,14 +96,20 @@ export function FeedbackForm({
             )}
             <span>Add feedback</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleClose}
-            className="p-0.5"
-          >
-            <X className="h-3 w-3" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                aria-label="Close"
+                className="p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Close</TooltipContent>
+          </Tooltip>
         </div>
         <div className="rounded-lg border border-input-border bg-secondary focus-within:border-input-border-focus transition-colors">
           <Textarea
@@ -111,31 +124,42 @@ export function FeedbackForm({
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSelectedRating("positive")}
-              className={cn(
-                selectedRating === "positive" &&
-                  "bg-success/20 text-success hover:bg-success/20 hover:text-success",
-              )}
-            >
-              <ThumbsUp className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSelectedRating("negative")}
-              className={cn(
-                selectedRating === "negative" &&
-                  "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
-              )}
-            >
-              <ThumbsDown className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedRating("positive")}
+                  aria-label="Good response"
+                  className={cn(
+                    selectedRating === "positive" &&
+                      "bg-success/20 text-success hover:bg-success/20 hover:text-success",
+                  )}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Good response</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedRating("negative")}
+                  aria-label="Bad response"
+                  className={cn(
+                    selectedRating === "negative" &&
+                      "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
+                  )}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Bad response</TooltipContent>
+            </Tooltip>
           </div>
           <Button variant="primary" size="sm" onClick={handleSubmitWithText}>
-            <Send className="h-3.5 w-3.5" />
             Send
           </Button>
         </div>
@@ -145,24 +169,34 @@ export function FeedbackForm({
 
   return (
     <div className="flex items-center gap-1 mt-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => handleQuickFeedback("positive")}
-        className="hover:text-success"
-        title="Good response"
-      >
-        <ThumbsUp className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => handleQuickFeedback("negative")}
-        className="hover:text-destructive"
-        title="Bad response"
-      >
-        <ThumbsDown className="h-3.5 w-3.5" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleQuickFeedback("positive")}
+            aria-label="Good response"
+            className="hover:text-success"
+          >
+            <ThumbsUp className="h-3.5 w-3.5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Good response</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleQuickFeedback("negative")}
+            aria-label="Bad response"
+            className="hover:text-destructive"
+          >
+            <ThumbsDown className="h-3.5 w-3.5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Bad response</TooltipContent>
+      </Tooltip>
       <Button
         variant="link"
         size="sm"
