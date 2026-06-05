@@ -1,6 +1,8 @@
 export { MessageList } from "./MessageList";
 export { ChatInput } from "./ChatInput";
 export { UserMessage } from "./UserMessage";
+export { MessageEditor } from "./MessageEditor";
+export { RollbackConfirm } from "./RollbackConfirm";
 export { AgentMessage } from "./AgentMessage";
 export { ToolOperationMessage } from "./ToolOperationMessage";
 export { ErrorMessage } from "./ErrorMessage";
