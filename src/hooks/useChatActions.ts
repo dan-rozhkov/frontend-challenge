@@ -121,11 +121,8 @@ export function useChatActions() {
       };
       useChatStore.getState().addMessage(userMessage);
 
-      /**
-       * INTENTIONAL BUG: No loading indicator shown immediately after sending.
-       * User has no feedback that agent is working for up to 1-5 seconds.
-       * This is a known issue for candidates to identify.
-       */
+      // `runAgent` flips `isAgentWorking` synchronously, and MessageList renders
+      // a WorkingIndicator off that flag, so feedback is immediate after send.
       await runAgent();
     },
     [runAgent],

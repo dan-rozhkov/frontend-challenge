@@ -13,11 +13,10 @@ export default function App() {
   return (
     <div className="h-screen flex">
       {/*
-        Chat panel - 30% width but can shrink to 0
-        INTENTIONAL BUG: min-w-0 allows shrinking when editor has fixed min-width
-        This is a known issue for candidates to identify.
+        Chat panel - 30% width, but never collapses below a usable minimum.
+        The editor (flex-1 min-w-0) absorbs the shrinking on narrow viewports.
       */}
-      <div className="w-[30%] min-w-0 flex flex-col bg-sidebar border-r border-sidebar-border">
+      <div className="w-[30%] min-w-[320px] flex flex-col bg-sidebar border-r border-sidebar-border">
         <ChatHeader />
         <MessageList messages={messages} isAgentWorking={isAgentWorking} />
         <ChatInput
@@ -30,11 +29,10 @@ export default function App() {
       </div>
 
       {/*
-        Editor panel - fixed minimum width
-        INTENTIONAL BUG: min-w-[400px] causes chat panel to shrink on narrow viewports
-        This is a known issue for candidates to identify.
+        Editor panel - takes the remaining space and is allowed to shrink
+        (min-w-0) so it gives way before the chat panel does.
       */}
-      <div className="flex-1 min-w-[400px] bg-background">
+      <div className="flex-1 min-w-0 bg-background">
         <MockEditor />
       </div>
     </div>

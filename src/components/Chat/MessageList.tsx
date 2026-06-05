@@ -13,6 +13,7 @@ import { FeedbackForm } from "./FeedbackForm";
 import { ToolOperationMessage } from "./ToolOperationMessage";
 import { UserMessage } from "./UserMessage";
 import { ScrollToBottomButton } from "./ScrollToBottomButton";
+import { WorkingIndicator } from "./WorkingIndicator";
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -175,11 +176,27 @@ export function MessageList({
     );
   }
 
+  // Show the working indicator while the agent spins up or pauses between
+  // steps, so there is always feedback. A running tool operation already has
+  // its own shimmer, so skip the indicator in that case to avoid doubling up.
+  const lastMessage = messages[messages.length - 1];
+  const showWorkingIndicator =
+    isAgentWorking &&
+    !(
+      lastMessage?.type === "tool_operation" &&
+      lastMessage.status === "running"
+    );
+
   return (
     <div className="relative flex-1 w-full min-w-0 min-h-0 flex flex-col overflow-hidden">
       <ScrollArea ref={scrollAreaRef} className="flex-1 w-full min-w-0 min-h-0">
         <div className="px-3 pt-4 pb-40 space-y-3 flex flex-col overflow-hidden">
           {renderMessages()}
+          {showWorkingIndicator && (
+            <div className="mx-3 min-w-0">
+              <WorkingIndicator />
+            </div>
+          )}
         </div>
       </ScrollArea>
       <ScrollToBottomButton

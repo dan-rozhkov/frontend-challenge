@@ -56,12 +56,16 @@ export function useAutoScroll(
   }, [smooth]);
 
   /**
-   * INTENTIONAL BUG: Always scroll to bottom on new content,
-   * ignoring whether user has scrolled up (isPinned state).
-   * This is a known UX issue for candidates to identify.
+   * Only auto-scroll on new content if the user is pinned to the bottom.
+   * If they have scrolled up to read, leave their position alone and surface
+   * the "scroll to bottom" affordance via `hasUnseenMessages` instead.
    */
   const onContentAdded = useCallback(() => {
-    scrollToBottom();
+    if (isPinnedRef.current) {
+      scrollToBottom();
+    } else {
+      setHasUnseenMessages(true);
+    }
   }, [scrollToBottom]);
 
   const onUserMessageSent = useCallback(() => {
