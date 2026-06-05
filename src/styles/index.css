@@ -81,6 +81,20 @@
     color: transparent;
     animation: shimmer-wave 2s linear infinite;
     animation-delay: var(--shimmer-delay, 0s);
+    /* Promote to its own compositor layer so the per-frame repaint of the
+       gradient (background-position is paint-bound under background-clip: text)
+       stays isolated and doesn't force overlapping content to repaint. */
+    will-change: background-position;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer-text {
+      animation: none;
+      will-change: auto;
+      /* Settle on the visible (bright) text instead of a frozen mid-wave. */
+      color: hsl(var(--foreground));
+      -webkit-text-fill-color: hsl(var(--foreground));
+    }
   }
 }
 
