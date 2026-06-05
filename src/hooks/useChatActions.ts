@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import {
   getToolDisplayName,
   getToolTarget,
@@ -22,6 +22,9 @@ function generateId(): string {
  * already mutated those values — the resend then starts from the right point.
  */
 export function useChatActions() {
+  // Controller for the in-flight rollback, so the loader can cancel the ~5s wait.
+  const rollbackControllerRef = useRef<AbortController | null>(null);
+
   const runAgent = useCallback(async () => {
     const { setAbortController, setAgentWorking } = useChatStore.getState();
 
@@ -164,6 +167,7 @@ export function useChatActions() {
       }
 
       const controller = new AbortController();
+      rollbackControllerRef.current = controller;
 
       try {
         const { fileContent } = await rollbackToMessage(
@@ -201,10 +205,17 @@ export function useChatActions() {
           timestamp: new Date().toISOString(),
         });
         return false;
+      } finally {
+        rollbackControllerRef.current = null;
       }
     },
     [runAgent],
   );
+
+  /** Abort the in-flight rollback (the loader's Cancel). */
+  const cancelRollback = useCallback(() => {
+    rollbackControllerRef.current?.abort();
+  }, []);
 
   const handleRestore = useCallback(
     (messageId: string) => runRollback(messageId),
@@ -222,6 +233,7 @@ export function useChatActions() {
     handleSubmit,
     handleInterrupt,
     runRollback,
+    cancelRollback,
     handleRestore,
     handleEditSubmit,
   };

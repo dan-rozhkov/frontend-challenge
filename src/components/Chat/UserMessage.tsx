@@ -20,7 +20,7 @@ type Confirm = "restore" | "edit" | null;
  * reopen the editor without losing the typed text.
  */
 export function UserMessage({ message }: UserMessageProps) {
-  const { handleRestore, handleEditSubmit } = useChatActions();
+  const { handleRestore, handleEditSubmit, cancelRollback } = useChatActions();
   const messages = useChatStore((s) => s.messages);
   const isRollingBack = useChatStore((s) => s.isRollingBack);
   const rollbackTargetId = useChatStore((s) => s.rollbackTargetId);
@@ -63,12 +63,20 @@ export function UserMessage({ message }: UserMessageProps) {
         <span className="block text-sm whitespace-pre-wrap text-sidebar-foreground/40">
           {isEditing ? draft : message.content}
         </span>
-        <div
-          className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"
-          aria-live="polite"
-        >
-          <Loader2 className="h-3 w-3 animate-spin" />
-          Reverting… (~5s)
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <div
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
+            aria-live="polite"
+          >
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Reverting… (~5s)
+          </div>
+          <button
+            onClick={cancelRollback}
+            className="rounded px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     );
