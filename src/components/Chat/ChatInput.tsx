@@ -109,16 +109,18 @@ export function ChatInput({
         <div className="flex items-center justify-end px-2 pb-2 gap-2">
           {canInterrupt ? (
             <Button
+              key="stop"
               variant="ghost"
               size="sm"
               onClick={onInterrupt}
               className="bg-accent-hover text-foreground hover:bg-accent-hover"
             >
-              <Square className="h-3.5 w-3.5 fill-current" />
+              <Square className="h-3 w-3 fill-current" />
               Stop
             </Button>
           ) : (
             <Button
+              key="send"
               variant="primary"
               size="icon"
               onClick={handleSubmit}

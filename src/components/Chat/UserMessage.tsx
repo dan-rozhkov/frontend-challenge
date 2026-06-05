@@ -129,11 +129,16 @@ export function UserMessage({ message }: UserMessageProps) {
   // message text. ---
   return (
     <div className="rounded-lg border border-border bg-sidebar-accent px-3 pt-1.5 pb-2">
-      <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-sidebar-foreground">
+      <div className="flex items-end justify-between gap-2">
+        <span
+          onDoubleClick={() => {
+            if (!isRollingBack) startEdit();
+          }}
+          className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-sidebar-foreground"
+        >
           {message.content}
         </span>
-        <div className="-mr-1.5 mt-0.5 flex shrink-0 items-center gap-1">
+        <div className="-mr-1.5 flex shrink-0 items-center gap-1">
           {affectedCount > 0 && (
             <Tooltip>
               <TooltipTrigger asChild>
