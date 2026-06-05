@@ -7,10 +7,26 @@ import {
   stopAgent,
 } from "@/services/mock-backend";
 import { useChatStore } from "@/stores/chat-store";
+import { generateId } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+/** Build an inline error message for the chat stream. */
+function errorMessage(message: string): ChatMessage {
+  return {
+    id: generateId(),
+    type: "error",
+    message,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/** Stop the agent, ignoring failures from the mock stop endpoint. */
+async function safeStopAgent(): Promise<void> {
+  try {
+    await stopAgent();
+  } catch {
+    // Ignore stop errors
+  }
 }
 
 /**
@@ -81,22 +97,13 @@ export function useChatActions() {
         }
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        useChatStore.getState().addMessage({
-          id: generateId(),
-          type: "error",
-          message: "Agent stopped by user",
-          timestamp: new Date().toISOString(),
-        });
-      } else {
-        useChatStore.getState().addMessage({
-          id: generateId(),
-          type: "error",
-          message:
-            error instanceof Error ? error.message : "Unknown error occurred",
-          timestamp: new Date().toISOString(),
-        });
-      }
+      const message =
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Agent stopped by user"
+          : error instanceof Error
+            ? error.message
+            : "Unknown error occurred";
+      useChatStore.getState().addMessage(errorMessage(message));
     } finally {
       const store = useChatStore.getState();
       store.setAgentWorking(false);
@@ -131,11 +138,7 @@ export function useChatActions() {
       abortController.abort();
     }
 
-    try {
-      await stopAgent();
-    } catch {
-      // Ignore stop errors
-    }
+    await safeStopAgent();
   }, []);
 
   /**
@@ -159,11 +162,7 @@ export function useChatActions() {
       // Concurrency: if the agent is mid-stream, interrupt it before rolling back.
       if (store.isAgentWorking && store.abortController) {
         store.abortController.abort();
-        try {
-          await stopAgent();
-        } catch {
-          // Ignore stop errors
-        }
+        await safeStopAgent();
       }
 
       const controller = new AbortController();
@@ -198,12 +197,13 @@ export function useChatActions() {
         }
         // Surface the failure inline in the chat stream, consistent with the
         // agent. State is only mutated on success, so nothing is lost here.
-        useChatStore.getState().addMessage({
-          id: generateId(),
-          type: "error",
-          message: error instanceof Error ? error.message : "Rollback failed",
-          timestamp: new Date().toISOString(),
-        });
+        useChatStore
+          .getState()
+          .addMessage(
+            errorMessage(
+              error instanceof Error ? error.message : "Rollback failed",
+            ),
+          );
         return false;
       } finally {
         rollbackControllerRef.current = null;

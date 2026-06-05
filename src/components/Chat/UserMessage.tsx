@@ -12,6 +12,9 @@ interface UserMessageProps {
 
 type Confirm = "restore" | "edit" | null;
 
+const ACTION_BUTTON =
+  "rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground disabled:cursor-not-allowed disabled:opacity-40 focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none";
+
 /**
  * A user message doubles as a checkpoint: hovering reveals Edit and
  * "Restore to here". Both run through one async rollback. Edit, confirm, and
@@ -56,6 +59,15 @@ export function UserMessage({ message }: UserMessageProps) {
     if (!ok) setIsEditing(true);
   };
 
+  const handleConfirm = () => {
+    if (confirm === "restore") {
+      setConfirm(null);
+      handleRestore(message.id);
+    } else {
+      confirmEdit();
+    }
+  };
+
   // --- In-flight: this message is being rolled back ---
   if (isReverting) {
     return (
@@ -88,10 +100,7 @@ export function UserMessage({ message }: UserMessageProps) {
       <RollbackConfirm
         count={affectedCount}
         mode={confirm}
-        onConfirm={confirm === "restore" ? () => {
-          setConfirm(null);
-          handleRestore(message.id);
-        } : confirmEdit}
+        onConfirm={handleConfirm}
         onCancel={() => setConfirm(null)}
       />
     );
@@ -122,7 +131,7 @@ export function UserMessage({ message }: UserMessageProps) {
           disabled={isRollingBack}
           aria-label="Edit message"
           title="Edit message"
-          className="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground disabled:cursor-not-allowed disabled:opacity-40 focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+          className={ACTION_BUTTON}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
@@ -132,7 +141,7 @@ export function UserMessage({ message }: UserMessageProps) {
             disabled={isRollingBack}
             aria-label="Restore to here"
             title="Restore chat and file to this point"
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground disabled:cursor-not-allowed disabled:opacity-40 focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+            className={ACTION_BUTTON}
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
