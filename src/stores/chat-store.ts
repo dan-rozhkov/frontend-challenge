@@ -15,6 +15,7 @@ interface ChatState {
   rollbackTargetId: string | null;
 
   addMessage: (message: ChatMessage) => void;
+  removeMessage: (messageId: string) => void;
   updateToolStatus: (
     toolCallId: string,
     status: ToolOperationStatus,
@@ -62,6 +63,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   addMessage: (message) => {
     set((state) => ({
       messages: [...state.messages, message],
+    }));
+  },
+
+  removeMessage: (messageId) => {
+    set((state) => ({
+      messages: state.messages.filter((msg) => msg.id !== messageId),
     }));
   },
 

@@ -24,6 +24,43 @@ function isToolCallMessage(message: ChatMessage): boolean {
   return message.type === "tool_operation";
 }
 
+/**
+ * IDs of the agent_message that *closes* each completed turn — the only place a
+ * feedback control belongs. A "turn" is the run of agent activity between two
+ * user messages; a single turn yields several text + tool messages, so we tag
+ * only its last agent_message. That way thumbs appear once per response instead
+ * of after every chunk. The still-streaming final turn is excluded while the
+ * agent is working, since more text may yet arrive.
+ */
+function feedbackTargetIds(
+  messages: ChatMessage[],
+  isAgentWorking: boolean,
+): Set<string> {
+  const ids = new Set<string>();
+  for (let i = 0; i < messages.length; i++) {
+    if (messages[i].type !== "agent_message") continue;
+
+    let isLastOfTurn = true;
+    let inLastTurn = true;
+    for (let j = i + 1; j < messages.length; j++) {
+      if (messages[j].type === "user") {
+        inLastTurn = false;
+        break;
+      }
+      if (messages[j].type === "agent_message") {
+        isLastOfTurn = false;
+        break;
+      }
+    }
+
+    if (!isLastOfTurn) continue;
+    // The current, in-progress turn gets no control until the agent stops.
+    if (inLastTurn && isAgentWorking) continue;
+    ids.add(messages[i].id);
+  }
+  return ids;
+}
+
 export function MessageList({
   messages,
   isAgentWorking = false,
@@ -82,6 +119,8 @@ export function MessageList({
     }
   }, [isAgentWorking, onContentAdded]);
 
+  const feedbackTargets = feedbackTargetIds(messages, isAgentWorking);
+
   const renderMessage = (message: ChatMessage) => {
     switch (message.type) {
       case "tool_operation": {
@@ -104,10 +143,12 @@ export function MessageList({
         return (
           <div className="mx-3 min-w-0 overflow-hidden">
             <AgentMessage message={agentMsg} />
-            <FeedbackForm
-              messageId={message.id}
-              currentFeedback={agentMsg.feedback}
-            />
+            {feedbackTargets.has(message.id) && (
+              <FeedbackForm
+                messageId={message.id}
+                currentFeedback={agentMsg.feedback}
+              />
+            )}
           </div>
         );
       }

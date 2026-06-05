@@ -8,14 +8,15 @@ import {
 } from "@/services/mock-backend";
 import { useChatStore } from "@/stores/chat-store";
 import { generateId } from "@/lib/utils";
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ErrorMessage, RetryAction } from "@/types/chat";
 
 /** Build an inline error message for the chat stream. */
-function errorMessage(message: string): ChatMessage {
+function errorMessage(message: string, retry?: RetryAction): ChatMessage {
   return {
     id: generateId(),
     type: "error",
     message,
+    retry,
     timestamp: new Date().toISOString(),
   };
 }
@@ -97,13 +98,17 @@ export function useChatActions() {
         }
       }
     } catch (error) {
-      const message =
-        error instanceof DOMException && error.name === "AbortError"
-          ? "Agent stopped by user"
-          : error instanceof Error
-            ? error.message
-            : "Unknown error occurred";
-      useChatStore.getState().addMessage(errorMessage(message));
+      const aborted =
+        error instanceof DOMException && error.name === "AbortError";
+      const message = aborted
+        ? "Agent stopped by user"
+        : error instanceof Error
+          ? error.message
+          : "Unknown error occurred";
+      // A user-initiated stop isn't a failure, so it gets no Retry affordance.
+      useChatStore
+        .getState()
+        .addMessage(errorMessage(message, aborted ? undefined : { kind: "agent" }));
     } finally {
       const store = useChatStore.getState();
       store.setAgentWorking(false);
@@ -194,13 +199,13 @@ export function useChatActions() {
         }
         // Surface the failure inline in the chat stream, consistent with the
         // agent. State is only mutated on success, so nothing is lost here.
-        useChatStore
-          .getState()
-          .addMessage(
-            errorMessage(
-              error instanceof Error ? error.message : "Rollback failed",
-            ),
-          );
+        useChatStore.getState().addMessage(
+          errorMessage(error instanceof Error ? error.message : "Rollback failed", {
+            kind: "rollback",
+            messageId,
+            resendText: options.resendText,
+          }),
+        );
         return false;
       } finally {
         rollbackControllerRef.current = null;
@@ -212,6 +217,31 @@ export function useChatActions() {
   /** Abort the in-flight rollback (the loader's Cancel). */
   const cancelRollback = useCallback(() => {
     rollbackControllerRef.current?.abort();
+  }, []);
+
+  /** Dismiss a surfaced error and re-run the action that produced it. */
+  const retryError = useCallback(
+    (error: ErrorMessage) => {
+      useChatStore.getState().removeMessage(error.id);
+      const retry = error.retry;
+      if (!retry) return;
+      if (retry.kind === "agent") {
+        void runAgent();
+      } else {
+        void runRollback(
+          retry.messageId,
+          retry.resendText !== undefined
+            ? { resendText: retry.resendText }
+            : {},
+        );
+      }
+    },
+    [runAgent, runRollback],
+  );
+
+  /** Dismiss a surfaced error without retrying. */
+  const dismissError = useCallback((errorId: string) => {
+    useChatStore.getState().removeMessage(errorId);
   }, []);
 
   const handleRestore = useCallback(
@@ -233,5 +263,7 @@ export function useChatActions() {
     cancelRollback,
     handleRestore,
     handleEditSubmit,
+    retryError,
+    dismissError,
   };
 }

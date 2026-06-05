@@ -1,7 +1,7 @@
 import { Button, Textarea } from "@/components/ui";
-import { Send, Square } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 
 const MIN_LINES = 2;
 const MAX_LINES = 8;
@@ -73,9 +73,24 @@ export function ChatInput({
 
   const effectivePlaceholder = placeholder;
 
+  const focusTextarea = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      // Let clicks on interactive elements (the Send/Stop button) behave normally.
+      if ((e.target as HTMLElement).closest("button, a, [role='button']")) return;
+      // Don't steal focus / clear a selection the user is making inside the textarea.
+      if (e.target === textareaRef.current) return;
+      e.preventDefault();
+      textareaRef.current?.focus();
+    },
+    [],
+  );
+
   return (
     <div className="mb-3 mx-3 relative">
-      <div className="flex flex-col border border-input-border bg-secondary rounded-lg focus-within:border-input-border-focus transition-colors">
+      <div
+        onMouseDown={focusTextarea}
+        className="flex flex-col border border-input-border bg-secondary rounded-lg focus-within:border-input-border-focus transition-colors cursor-text"
+      >
         <Textarea
           ref={textareaRef}
           value={value}
@@ -89,18 +104,19 @@ export function ChatInput({
         />
         <div className="flex items-center justify-end px-2 pb-2 gap-2">
           {canInterrupt ? (
-            <Button variant="destructive" onClick={onInterrupt}>
+            <Button variant="destructive" size="sm" onClick={onInterrupt}>
               <Square className="h-3.5 w-3.5 fill-current" />
               Stop
             </Button>
           ) : (
             <Button
               variant="primary"
+              size="icon"
               onClick={handleSubmit}
               disabled={!canSend}
+              aria-label="Send"
             >
-              <Send className="h-3.5 w-3.5" />
-              Send
+              <ArrowUp className="h-4 w-4" />
             </Button>
           )}
         </div>

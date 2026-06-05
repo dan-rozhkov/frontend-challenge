@@ -119,14 +119,17 @@ export function UserMessage({ message }: UserMessageProps) {
     );
   }
 
-  // --- Idle bubble with the actions pinned bottom-left inside the bubble,
-  // styled like the feedback thumbs under agent messages. ---
+  // --- Idle bubble with the actions sitting outside the card, in a row pinned
+  // to the right beneath it, styled like the feedback thumbs under agent
+  // messages. ---
   return (
-    <div className="rounded-lg border border-border bg-sidebar-accent px-3 py-1.5">
-      <span className="text-sm whitespace-pre-wrap text-sidebar-foreground">
-        {message.content}
-      </span>
-      <div className="mt-2 flex items-center gap-1">
+    <div>
+      <div className="rounded-lg border border-border bg-sidebar-accent px-3 pt-1.5 pb-2">
+        <span className="text-sm whitespace-pre-wrap text-sidebar-foreground">
+          {message.content}
+        </span>
+      </div>
+      <div className="mt-1.5 flex items-center justify-end gap-1 pr-1.5">
         <Button
           variant="ghost"
           size="icon"

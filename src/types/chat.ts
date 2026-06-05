@@ -40,9 +40,17 @@ export interface UserMessage extends ChatMessageBase {
   content: string;
 }
 
+/** How a surfaced error can be retried, if at all. */
+export type RetryAction =
+  | { kind: "agent" }
+  | { kind: "rollback"; messageId: string; resendText?: string };
+
 export interface ErrorMessage extends ChatMessageBase {
   type: "error";
+  /** Raw `CODE: detail` string from the backend; kept for logs, never shown as-is. */
   message: string;
+  /** Present when the failed action can be re-run from the error card. */
+  retry?: RetryAction;
 }
 
 export type ChatMessage =
