@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { Button, Textarea } from "@/components/ui";
 import { Send, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
@@ -76,7 +76,7 @@ export function ChatInput({
   return (
     <div className="mb-3 mx-3 relative">
       <div className="flex flex-col border border-input-border bg-secondary rounded-lg focus-within:border-input-border-focus transition-colors">
-        <textarea
+        <Textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -85,43 +85,23 @@ export function ChatInput({
           placeholder={effectivePlaceholder}
           style={{ minHeight }}
           disabled={disabled}
-          className={cn(
-            "w-full resize-none bg-transparent px-2 pt-2 pb-2",
-            "text-sm placeholder:text-muted-foreground leading-5 text-foreground",
-            "focus:outline-none",
-          )}
+          className="px-2 pt-2 pb-2"
         />
         <div className="flex items-center justify-end px-2 pb-2 gap-2">
           {canInterrupt ? (
-            <button
-              onClick={onInterrupt}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm",
-                "bg-destructive/20 text-destructive hover:bg-destructive/30",
-                "transition-colors",
-              )}
-            >
+            <Button variant="destructive" onClick={onInterrupt}>
               <Square className="h-3.5 w-3.5 fill-current" />
               Stop
-            </button>
+            </Button>
           ) : (
-            /**
-             * INTENTIONAL BUG: No hover state on send button.
-             * This is a known issue for candidates to identify.
-             */
-            <button
+            <Button
+              variant="primary"
               onClick={handleSubmit}
               disabled={!canSend}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm",
-                "bg-primary text-primary-foreground",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "transition-colors",
-              )}
             >
               <Send className="h-3.5 w-3.5" />
               Send
-            </button>
+            </Button>
           )}
         </div>
       </div>

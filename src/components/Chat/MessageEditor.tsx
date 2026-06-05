@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { Button, Textarea } from "@/components/ui";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
@@ -54,7 +54,7 @@ export function MessageEditor({
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-input-border-focus bg-secondary p-2">
-      <textarea
+      <Textarea
         ref={textareaRef}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -63,25 +63,20 @@ export function MessageEditor({
         rows={1}
         disabled={disabled}
         aria-label="Edit message"
-        className={cn(
-          "w-full resize-none bg-transparent text-sm leading-5 text-foreground",
-          "max-h-40 overflow-y-auto placeholder:text-muted-foreground focus:outline-none",
-        )}
+        className="max-h-40 overflow-y-auto"
       />
       <div className="flex items-center justify-end gap-1.5">
-        <button
-          onClick={onCancel}
-          className="rounded-md px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-        >
+        <Button variant="ghost" size="sm" onClick={onCancel}>
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
           onClick={submit}
           disabled={!canSave}
-          className="rounded-md bg-primary px-2.5 py-1 text-xs text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
         >
           Save &amp; re-run
-        </button>
+        </Button>
       </div>
     </div>
   );

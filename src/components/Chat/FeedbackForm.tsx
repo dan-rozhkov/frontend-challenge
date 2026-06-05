@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Button, Textarea } from "@/components/ui";
 import { useChatStore } from "@/stores/chat-store";
 import type { MessageFeedback } from "@/types/chat";
 import { Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
@@ -10,9 +11,9 @@ interface FeedbackFormProps {
 }
 
 /**
- * INTENTIONAL UX ISSUE: Uses single-line input instead of textarea,
- * making it difficult to enter long feedback text.
- * This is a known issue for candidates to identify.
+ * Inline feedback affordance for an agent message: quick thumbs, or expand to
+ * add a comment. The comment field is a multi-line textarea (Enter submits,
+ * Shift+Enter inserts a newline) so longer feedback is easy to type.
  */
 export function FeedbackForm({
   messageId,
@@ -83,56 +84,58 @@ export function FeedbackForm({
             )}
             <span>Add feedback</span>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            className="rounded p-0.5 hover:bg-accent"
+            className="rounded p-0.5"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
         <div className="flex gap-1">
-          {/* INTENTIONAL BUG: Single-line input instead of textarea */}
-          <input
-            type="text"
+          <Textarea
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="What could be better?"
-            className="flex-1 rounded-md border bg-background px-2 py-1 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            rows={2}
+            className="flex-1 rounded-md border bg-background px-2 py-1 focus:ring-1 focus:ring-ring"
           />
-          <button
+          <Button
+            variant="primary"
+            size="icon"
             onClick={handleSubmitWithText}
-            className={cn(
-              "rounded-md p-1.5 transition-colors",
-              "bg-primary text-primary-foreground hover:bg-primary/90",
-            )}
+            className="self-start p-1.5"
           >
             <Send className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
         <div className="flex gap-1 mt-1">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setSelectedRating("positive")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1 rounded-md p-1 text-xs transition-colors",
-              selectedRating === "positive"
-                ? "bg-success/20 text-success"
-                : "hover:bg-accent",
+              "flex-1 gap-1 rounded-md text-xs",
+              selectedRating === "positive" &&
+                "bg-success/20 text-success hover:bg-success/20 hover:text-success",
             )}
           >
             <ThumbsUp className="h-3 w-3" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setSelectedRating("negative")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1 rounded-md p-1 text-xs transition-colors",
-              selectedRating === "negative"
-                ? "bg-destructive/20 text-destructive"
-                : "hover:bg-accent",
+              "flex-1 gap-1 rounded-md text-xs",
+              selectedRating === "negative" &&
+                "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
             )}
           >
             <ThumbsDown className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -140,26 +143,32 @@ export function FeedbackForm({
 
   return (
     <div className="flex items-center gap-1 mt-2">
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => handleQuickFeedback("positive")}
-        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-success transition-colors"
+        className="rounded hover:text-success"
         title="Good response"
       >
         <ThumbsUp className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => handleQuickFeedback("negative")}
-        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-destructive transition-colors"
+        className="rounded hover:text-destructive"
         title="Bad response"
       >
         <ThumbsDown className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="link"
+        size="sm"
         onClick={() => handleShowInput("positive")}
-        className="ml-1 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors"
+        className="ml-1 px-0 py-0 hover:text-sidebar-foreground"
       >
         Add comment...
-      </button>
+      </Button>
     </div>
   );
 }

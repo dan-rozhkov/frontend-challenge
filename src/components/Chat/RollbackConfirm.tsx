@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui";
 import { AlertTriangle } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
@@ -56,23 +56,17 @@ export function RollbackConfirm({
         </p>
       </div>
       <div className="flex items-center justify-end gap-1.5">
-        <button
-          ref={cancelRef}
-          onClick={onCancel}
-          className="rounded-md px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-        >
+        <Button ref={cancelRef} variant="ghost" size="sm" onClick={onCancel}>
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="warning"
+          size="sm"
           onClick={onConfirm}
-          className={cn(
-            "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-            "bg-warning/15 text-warning hover:bg-warning/25",
-            "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
-          )}
+          className="font-medium"
         >
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );

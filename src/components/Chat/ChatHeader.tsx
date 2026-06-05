@@ -1,5 +1,6 @@
 import { Bot, RotateCcw } from "lucide-react";
 import { useChatStore } from "@/stores/chat-store";
+import { Button } from "@/components/ui";
 import { useCallback } from "react";
 
 export function ChatHeader() {
@@ -19,13 +20,15 @@ export function ChatHeader() {
         </span>
       </div>
       {messagesCount > 0 && (
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleNewChat}
-          className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+          className="rounded px-2 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           New Chat
-        </button>
+        </Button>
       )}
     </div>
   );

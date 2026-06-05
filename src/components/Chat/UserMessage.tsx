@@ -1,6 +1,7 @@
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
 import type { UserMessage as UserMessageType } from "@/types/chat";
+import { Button } from "@/components/ui";
 import { Loader2, Pencil, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { MessageEditor } from "./MessageEditor";
@@ -12,8 +13,11 @@ interface UserMessageProps {
 
 type Confirm = "restore" | "edit" | null;
 
+// Extras on top of the ghost/icon Button: tighter radius, the sidebar hover
+// tint, a softer disabled fade, and focus-visible reveal so keyboard users see
+// the hover-gated actions.
 const ACTION_BUTTON =
-  "rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground disabled:cursor-not-allowed disabled:opacity-40 focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none";
+  "rounded hover:text-sidebar-foreground disabled:opacity-40 focus-visible:opacity-100";
 
 /**
  * A user message doubles as a checkpoint: hovering reveals Edit and
@@ -83,12 +87,14 @@ export function UserMessage({ message }: UserMessageProps) {
             <Loader2 className="h-3 w-3 animate-spin" />
             Reverting… (~5s)
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={cancelRollback}
-            className="rounded px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-sidebar-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+            className="rounded px-1.5 py-0.5 hover:text-sidebar-foreground"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -126,7 +132,9 @@ export function UserMessage({ message }: UserMessageProps) {
         </span>
       </div>
       <div className="absolute -top-3 right-1 flex items-center gap-0.5 rounded-md border border-border bg-sidebar p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={startEdit}
           disabled={isRollingBack}
           aria-label="Edit message"
@@ -134,9 +142,11 @@ export function UserMessage({ message }: UserMessageProps) {
           className={ACTION_BUTTON}
         >
           <Pencil className="h-3.5 w-3.5" />
-        </button>
+        </Button>
         {affectedCount > 0 && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setConfirm("restore")}
             disabled={isRollingBack}
             aria-label="Restore to here"
@@ -144,7 +154,7 @@ export function UserMessage({ message }: UserMessageProps) {
             className={ACTION_BUTTON}
           >
             <RotateCcw className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </div>
     </div>
