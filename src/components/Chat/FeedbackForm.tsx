@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
-import { Button, Textarea } from "@/components/ui";
+import { Button, Panel, Textarea } from "@/components/ui";
 import { useChatStore } from "@/stores/chat-store";
 import type { MessageFeedback } from "@/types/chat";
 import { Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface FeedbackFormProps {
   messageId: string;
@@ -25,6 +25,11 @@ export function FeedbackForm({
     currentFeedback ?? null,
   );
   const setMessageFeedback = useChatStore((s) => s.setMessageFeedback);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (showInput) textareaRef.current?.focus();
+  }, [showInput]);
 
   const handleQuickFeedback = useCallback(
     (rating: MessageFeedback) => {
@@ -74,8 +79,8 @@ export function FeedbackForm({
 
   if (showInput) {
     return (
-      <div className="mt-2 p-2 bg-muted/30 rounded-lg max-w-56">
-        <div className="flex items-center justify-between mb-2">
+      <Panel onClose={handleClose} className="mt-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {selectedRating === "positive" ? (
               <ThumbsUp className="h-3 w-3 text-success" />
@@ -88,56 +93,53 @@ export function FeedbackForm({
             variant="ghost"
             size="icon"
             onClick={handleClose}
-            className="rounded p-0.5"
+            className="p-0.5"
           >
             <X className="h-3 w-3" />
           </Button>
         </div>
-        <div className="flex gap-1">
+        <div className="rounded-lg border border-input-border bg-secondary focus-within:border-input-border-focus transition-colors">
           <Textarea
+            ref={textareaRef}
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="What could be better?"
             rows={2}
-            className="flex-1 rounded-md border bg-background px-2 py-1 focus:ring-1 focus:ring-ring"
+            className="px-2 py-1.5"
           />
-          <Button
-            variant="primary"
-            size="icon"
-            onClick={handleSubmitWithText}
-            className="self-start p-1.5"
-          >
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedRating("positive")}
+              className={cn(
+                selectedRating === "positive" &&
+                  "bg-success/20 text-success hover:bg-success/20 hover:text-success",
+              )}
+            >
+              <ThumbsUp className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedRating("negative")}
+              className={cn(
+                selectedRating === "negative" &&
+                  "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
+              )}
+            >
+              <ThumbsDown className="h-3 w-3" />
+            </Button>
+          </div>
+          <Button variant="primary" size="sm" onClick={handleSubmitWithText}>
             <Send className="h-3.5 w-3.5" />
+            Send
           </Button>
         </div>
-        <div className="flex gap-1 mt-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSelectedRating("positive")}
-            className={cn(
-              "flex-1 gap-1 rounded-md text-xs",
-              selectedRating === "positive" &&
-                "bg-success/20 text-success hover:bg-success/20 hover:text-success",
-            )}
-          >
-            <ThumbsUp className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSelectedRating("negative")}
-            className={cn(
-              "flex-1 gap-1 rounded-md text-xs",
-              selectedRating === "negative" &&
-                "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
-            )}
-          >
-            <ThumbsDown className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
+      </Panel>
     );
   }
 
@@ -147,7 +149,7 @@ export function FeedbackForm({
         variant="ghost"
         size="icon"
         onClick={() => handleQuickFeedback("positive")}
-        className="rounded hover:text-success"
+        className="hover:text-success"
         title="Good response"
       >
         <ThumbsUp className="h-3.5 w-3.5" />
@@ -156,7 +158,7 @@ export function FeedbackForm({
         variant="ghost"
         size="icon"
         onClick={() => handleQuickFeedback("negative")}
-        className="rounded hover:text-destructive"
+        className="hover:text-destructive"
         title="Bad response"
       >
         <ThumbsDown className="h-3.5 w-3.5" />

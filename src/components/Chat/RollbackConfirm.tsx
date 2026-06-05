@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui";
+import { Button, Panel } from "@/components/ui";
 import { AlertTriangle } from "lucide-react";
 import { useEffect, useRef } from "react";
-import type { KeyboardEvent } from "react";
 
 interface RollbackConfirmProps {
   /** How many messages after the target will be dropped. */
@@ -28,13 +27,6 @@ export function RollbackConfirm({
     cancelRef.current?.focus();
   }, []);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      onCancel();
-    }
-  };
-
   const plural = count === 1 ? "message" : "messages";
   const confirmLabel = mode === "restore" ? "Restore" : "Save & re-run";
   const description =
@@ -43,11 +35,10 @@ export function RollbackConfirm({
       : `Re-run from here. This removes the ${count} ${plural} after this one.`;
 
   return (
-    <div
+    <Panel
       role="alertdialog"
       aria-label="Confirm rollback"
-      onKeyDown={handleKeyDown}
-      className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-2.5"
+      onClose={onCancel}
     >
       <div className="flex items-start gap-2">
         <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning/90" />
@@ -68,6 +59,6 @@ export function RollbackConfirm({
           {confirmLabel}
         </Button>
       </div>
-    </div>
+    </Panel>
   );
 }

@@ -1,4 +1,4 @@
-import { Button, Textarea } from "@/components/ui";
+import { Button, Panel, Textarea } from "@/components/ui";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
@@ -46,14 +46,14 @@ export function MessageEditor({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      onCancel();
     }
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-input-border-focus bg-secondary p-2">
+    <Panel
+      onClose={onCancel}
+      className="border-input-border-focus bg-secondary p-2"
+    >
       <Textarea
         ref={textareaRef}
         value={value}
@@ -78,6 +78,6 @@ export function MessageEditor({
           Save &amp; re-run
         </Button>
       </div>
-    </div>
+    </Panel>
   );
 }

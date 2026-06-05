@@ -13,11 +13,11 @@ interface UserMessageProps {
 
 type Confirm = "restore" | "edit" | null;
 
-// Extras on top of the ghost/icon Button: tighter radius, the sidebar hover
-// tint, a softer disabled fade, and focus-visible reveal so keyboard users see
-// the hover-gated actions.
+// Extras on top of the ghost/icon Button, matching the feedback thumbs: just a
+// hover tint plus a softer disabled fade. Radius and sizing are inherited from
+// the Button component; the row's reveal is handled by the container.
 const ACTION_BUTTON =
-  "rounded hover:text-sidebar-foreground disabled:opacity-40 focus-visible:opacity-100";
+  "hover:text-sidebar-foreground disabled:opacity-40";
 
 /**
  * A user message doubles as a checkpoint: hovering reveals Edit and
@@ -87,7 +87,7 @@ export function UserMessage({ message }: UserMessageProps) {
             variant="ghost"
             size="sm"
             onClick={cancelRollback}
-            className="rounded px-1.5 py-0.5 hover:text-sidebar-foreground"
+            className="px-1.5 py-0.5 hover:text-sidebar-foreground"
           >
             Cancel
           </Button>
@@ -119,15 +119,14 @@ export function UserMessage({ message }: UserMessageProps) {
     );
   }
 
-  // --- Idle bubble with hover/focus actions ---
+  // --- Idle bubble with the actions pinned bottom-left inside the bubble,
+  // styled like the feedback thumbs under agent messages. ---
   return (
-    <div className="group relative">
-      <div className="rounded-lg border border-border bg-sidebar-accent px-3 py-1.5">
-        <span className="text-sm whitespace-pre-wrap text-sidebar-foreground">
-          {message.content}
-        </span>
-      </div>
-      <div className="absolute -top-3 right-1 flex items-center gap-0.5 rounded-md border border-border bg-sidebar p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+    <div className="rounded-lg border border-border bg-sidebar-accent px-3 py-1.5">
+      <span className="text-sm whitespace-pre-wrap text-sidebar-foreground">
+        {message.content}
+      </span>
+      <div className="mt-2 flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"

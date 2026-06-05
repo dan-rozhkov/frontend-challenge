@@ -24,7 +24,7 @@ export function ChatHeader() {
           variant="ghost"
           size="sm"
           onClick={handleNewChat}
-          className="rounded px-2 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="px-2 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           New Chat
