@@ -97,7 +97,7 @@ export function ChatInput({
               onClick={onInterrupt}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm",
-                "bg-red-500/20 text-red-400 hover:bg-red-500/30",
+                "bg-destructive/20 text-destructive hover:bg-destructive/30",
                 "transition-colors",
               )}
             >

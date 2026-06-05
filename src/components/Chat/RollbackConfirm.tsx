@@ -50,7 +50,7 @@ export function RollbackConfirm({
       className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-2.5"
     >
       <div className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400/90" />
+        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning/90" />
         <p className="text-xs leading-snug text-muted-foreground" aria-live="polite">
           {description}
         </p>
@@ -67,7 +67,7 @@ export function RollbackConfirm({
           onClick={onConfirm}
           className={cn(
             "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-            "bg-amber-400/15 text-amber-300 hover:bg-amber-400/25",
+            "bg-warning/15 text-warning hover:bg-warning/25",
             "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none",
           )}
         >

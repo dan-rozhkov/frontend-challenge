@@ -13,7 +13,7 @@ export function ChatHeader() {
   return (
     <div className="flex items-center justify-between px-4 py-3 border-b border-sidebar-border">
       <div className="flex items-center gap-2">
-        <Bot className="h-5 w-5 text-sidebar-primary" />
+        <Bot className="h-5 w-5 text-brand" />
         <span className="text-sm font-semibold text-sidebar-foreground">
           AI Coding Agent
         </span>

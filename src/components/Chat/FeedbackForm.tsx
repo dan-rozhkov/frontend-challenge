@@ -63,9 +63,9 @@ export function FeedbackForm({
       <div className="flex items-center gap-1 mt-2">
         <span className="text-xs text-muted-foreground">Feedback:</span>
         {currentFeedback === "positive" ? (
-          <ThumbsUp className="h-3 w-3 text-green-500" />
+          <ThumbsUp className="h-3 w-3 text-success" />
         ) : (
-          <ThumbsDown className="h-3 w-3 text-red-500" />
+          <ThumbsDown className="h-3 w-3 text-destructive" />
         )}
       </div>
     );
@@ -77,9 +77,9 @@ export function FeedbackForm({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {selectedRating === "positive" ? (
-              <ThumbsUp className="h-3 w-3 text-green-500" />
+              <ThumbsUp className="h-3 w-3 text-success" />
             ) : (
-              <ThumbsDown className="h-3 w-3 text-red-500" />
+              <ThumbsDown className="h-3 w-3 text-destructive" />
             )}
             <span>Add feedback</span>
           </div>
@@ -116,7 +116,7 @@ export function FeedbackForm({
             className={cn(
               "flex-1 flex items-center justify-center gap-1 rounded-md p-1 text-xs transition-colors",
               selectedRating === "positive"
-                ? "bg-green-500/20 text-green-600"
+                ? "bg-success/20 text-success"
                 : "hover:bg-accent",
             )}
           >
@@ -127,7 +127,7 @@ export function FeedbackForm({
             className={cn(
               "flex-1 flex items-center justify-center gap-1 rounded-md p-1 text-xs transition-colors",
               selectedRating === "negative"
-                ? "bg-red-500/20 text-red-600"
+                ? "bg-destructive/20 text-destructive"
                 : "hover:bg-accent",
             )}
           >
@@ -142,14 +142,14 @@ export function FeedbackForm({
     <div className="flex items-center gap-1 mt-2">
       <button
         onClick={() => handleQuickFeedback("positive")}
-        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-green-500 transition-colors"
+        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-success transition-colors"
         title="Good response"
       >
         <ThumbsUp className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={() => handleQuickFeedback("negative")}
-        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-red-500 transition-colors"
+        className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-destructive transition-colors"
         title="Bad response"
       >
         <ThumbsDown className="h-3.5 w-3.5" />
