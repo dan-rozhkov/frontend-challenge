@@ -1,8 +1,8 @@
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
 import type { UserMessage as UserMessageType } from "@/types/chat";
-import { Button } from "@/components/ui";
-import { Loader2, Pencil, RotateCcw } from "lucide-react";
+import { Button, ShimmerText } from "@/components/ui";
+import { Pencil, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { MessageEditor } from "./MessageEditor";
 import { RollbackConfirm } from "./RollbackConfirm";
@@ -80,12 +80,8 @@ export function UserMessage({ message }: UserMessageProps) {
           {isEditing ? draft : message.content}
         </span>
         <div className="mt-1.5 flex items-center justify-between gap-2">
-          <div
-            className="flex items-center gap-1.5 text-xs text-muted-foreground"
-            aria-live="polite"
-          >
-            <Loader2 className="h-3 w-3 animate-spin" />
-            Reverting… (~5s)
+          <div className="text-xs" aria-live="polite">
+            <ShimmerText>Reverting… (~5s)</ShimmerText>
           </div>
           <Button
             variant="ghost"

@@ -1,10 +1,9 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { ToolOperationStatus } from "@/types/chat";
-
-const SHIMMER_DURATION_MS = 2000;
+import { ShimmerText } from "@/components/ui";
 
 interface ToolOperationMessageProps {
   displayName: string;
@@ -26,6 +25,21 @@ function formatArgs(args: Record<string, unknown>): string {
   return lines.join("\n");
 }
 
+const DETAIL_CLASS = "shrink-[99999] min-w-0 truncate ml-1.5 opacity-70";
+
+function DetailText({
+  running,
+  children,
+}: {
+  running: boolean;
+  children: React.ReactNode;
+}) {
+  if (running) {
+    return <ShimmerText className={DETAIL_CLASS}>{children}</ShimmerText>;
+  }
+  return <span className={DETAIL_CLASS}>{children}</span>;
+}
+
 export function ToolOperationMessage({
   displayName,
   target,
@@ -38,12 +52,6 @@ export function ToolOperationMessage({
 
   const hasExpandableContent = result || (args && Object.keys(args).length > 0);
   const content = result || (args && formatArgs(args)) || "";
-
-  const shimmerDelay = useMemo(() => {
-    const now = performance.now();
-    const phase = now % SHIMMER_DURATION_MS;
-    return `-${phase}ms`;
-  }, []);
 
   return (
     <Collapsible.Root
@@ -61,34 +69,10 @@ export function ToolOperationMessage({
           {displayName}
         </span>
         {description && (
-          <span
-            className={cn(
-              "shrink-[99999] min-w-0 truncate ml-1.5 opacity-70",
-              status === "running" && "shimmer-text",
-            )}
-            style={
-              status === "running"
-                ? ({ "--shimmer-delay": shimmerDelay } as React.CSSProperties)
-                : undefined
-            }
-          >
-            {description}
-          </span>
+          <DetailText running={status === "running"}>{description}</DetailText>
         )}
         {target && !description && (
-          <span
-            className={cn(
-              "shrink-[99999] min-w-0 truncate ml-1.5 opacity-70",
-              status === "running" && "shimmer-text",
-            )}
-            style={
-              status === "running"
-                ? ({ "--shimmer-delay": shimmerDelay } as React.CSSProperties)
-                : undefined
-            }
-          >
-            {target}
-          </span>
+          <DetailText running={status === "running"}>{target}</DetailText>
         )}
         {hasExpandableContent && (
           <span
