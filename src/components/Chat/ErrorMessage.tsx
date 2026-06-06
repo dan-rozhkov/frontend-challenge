@@ -41,7 +41,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
         </Button>
         {canRetry && (
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             onClick={() => retryError(message)}
             className="font-medium"

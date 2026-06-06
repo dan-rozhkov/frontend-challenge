@@ -159,7 +159,7 @@ export function FeedbackForm({
               <TooltipContent>Bad response</TooltipContent>
             </Tooltip>
           </div>
-          <Button variant="primary" size="sm" onClick={handleSubmitWithText}>
+          <Button variant="secondary" size="sm" onClick={handleSubmitWithText}>
             Send
           </Button>
         </div>

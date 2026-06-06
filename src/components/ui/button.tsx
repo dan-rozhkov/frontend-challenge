@@ -14,7 +14,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        primary: "bg-brand text-brand-foreground hover:bg-brand-hover",
+        secondary:
+          "bg-primary text-primary-foreground hover:bg-primary-hover",
         destructive:
           "bg-destructive/20 text-destructive hover:bg-destructive/30",
         warning: "bg-warning/15 text-warning hover:bg-warning/25",
