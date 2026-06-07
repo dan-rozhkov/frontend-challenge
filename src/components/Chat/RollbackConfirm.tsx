@@ -28,34 +28,38 @@ export function RollbackConfirm({
   }, []);
 
   const plural = count === 1 ? "message" : "messages";
-  const confirmLabel = mode === "restore" ? "Restore" : "Save & re-run";
+  const confirmLabel = mode === "restore" ? "Restore" : "Re-run";
+  const title =
+    mode === "restore" ? "Restore to here" : "Re-run from this message?";
   const description =
     mode === "restore"
       ? `Restore the file to this point and remove the ${count} ${plural} after it.`
-      : `Re-run from here. This removes the ${count} ${plural} after this one.`;
+      : `This deletes the ${count} ${plural} below. The file reverts to this point.`;
 
   return (
     <Panel
       role="alertdialog"
       aria-label="Confirm rollback"
       onClose={onCancel}
+      className="border-white/[0.08] bg-sidebar-accent"
     >
       <div className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning/90" />
-        <p className="text-xs leading-snug text-muted-foreground" aria-live="polite">
-          {description}
-        </p>
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 fill-warning text-muted" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm">{title}</p>
+          <p
+            className="mt-0.5 text-xs leading-snug text-muted-foreground"
+            aria-live="polite"
+          >
+            {description}
+          </p>
+        </div>
       </div>
       <div className="flex items-center justify-end gap-1.5">
         <Button ref={cancelRef} variant="ghost" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          variant="warning"
-          size="sm"
-          onClick={onConfirm}
-          className="font-medium"
-        >
+        <Button variant="secondary" size="sm" onClick={onConfirm}>
           {confirmLabel}
         </Button>
       </div>

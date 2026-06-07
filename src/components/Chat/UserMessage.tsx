@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
 import type { UserMessage as UserMessageType } from "@/types/chat";
@@ -8,10 +9,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui";
-import { Pencil, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { Pencil, Undo2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { MessageEditor } from "./MessageEditor";
 import { RollbackConfirm } from "./RollbackConfirm";
+import { FadeOverlay } from "./FadeOverlay";
 
 interface UserMessageProps {
   message: UserMessageType;
@@ -41,6 +43,27 @@ export function UserMessage({ message }: UserMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content);
   const [confirm, setConfirm] = useState<Confirm>(null);
+
+  // Short messages (≤2 lines) leave room below, so the confirmation reads best
+  // pinned to the top; tall ones would be covered, so it drops to the bottom.
+  // Measured from the rendered bubble — re-measured on resize since the panel
+  // can be narrowed and rewrap the text.
+  const [textEl, setTextEl] = useState<HTMLSpanElement | null>(null);
+  const [anchor, setAnchor] = useState<"top" | "bottom">("top");
+  useEffect(() => {
+    if (!textEl) return;
+    const measure = () => {
+      const cs = getComputedStyle(textEl);
+      const lineHeight =
+        parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
+      const lines = Math.round(textEl.scrollHeight / lineHeight);
+      setAnchor(lines <= 2 ? "top" : "bottom");
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(textEl);
+    return () => ro.disconnect();
+  }, [textEl, message.content]);
 
   const index = messages.findIndex((m) => m.id === message.id);
   const affectedCount = index === -1 ? 0 : messages.length - (index + 1);
@@ -81,7 +104,7 @@ export function UserMessage({ message }: UserMessageProps) {
   // --- In-flight: this message is being rolled back ---
   if (isReverting) {
     return (
-      <div className="rounded-lg border border-border bg-sidebar-accent px-3 py-1.5">
+      <div className="rounded-lg bg-sidebar-accent px-3 py-1.5">
         <span className="block text-sm whitespace-pre-wrap text-sidebar-foreground/40">
           {isEditing ? draft : message.content}
         </span>
@@ -102,77 +125,99 @@ export function UserMessage({ message }: UserMessageProps) {
     );
   }
 
-  // --- Destructive confirmation ---
-  if (confirm) {
-    return (
-      <RollbackConfirm
-        count={affectedCount}
-        mode={confirm}
-        onConfirm={handleConfirm}
-        onCancel={() => setConfirm(null)}
-      />
-    );
-  }
-
-  // --- Inline edit ---
-  if (isEditing) {
-    return (
-      <MessageEditor
-        initialValue={draft}
-        onSubmit={submitEdit}
-        onCancel={() => setIsEditing(false)}
-      />
-    );
-  }
-
-  // --- Idle bubble with the actions sitting inside the card, top-right of the
-  // message text. ---
+  // The idle bubble and the inline editor are the two "base" states. The
+  // destructive confirmation floats *over* whichever is showing, as a shadowed
+  // popover, rather than replacing it.
   return (
-    <div className="rounded-lg border border-border bg-sidebar-accent px-3 pt-1.5 pb-2">
-      <div className="flex items-end justify-between gap-2">
-        <span
-          onDoubleClick={() => {
-            if (!isRollingBack) startEdit();
-          }}
-          className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-sidebar-foreground"
-        >
-          {message.content}
-        </span>
-        <div className="-mr-1.5 flex shrink-0 items-center gap-1">
-          {affectedCount > 0 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setConfirm("restore")}
-                  disabled={isRollingBack}
-                  aria-label="Restore to here"
-                  className={ACTION_BUTTON}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Restore chat and file to this point</TooltipContent>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={startEdit}
-                disabled={isRollingBack}
-                aria-label="Edit message"
-                className={ACTION_BUTTON}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Edit message</TooltipContent>
-          </Tooltip>
-        </div>
+    <div className="relative">
+      {/* While the confirmation popover floats over the message, the base
+          recedes — scales down and fades — so the popover reads as the
+          foreground layer. */}
+      <div
+        className={cn(
+          "transition-all duration-200",
+          confirm && "scale-[0.98] opacity-60",
+        )}
+      >
+        {isEditing ? (
+          <MessageEditor
+            initialValue={draft}
+            onSubmit={submitEdit}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <div className="rounded-lg bg-sidebar-accent px-3 pt-1.5 pb-2">
+          <div className="flex items-end justify-between gap-2">
+            <span
+              ref={setTextEl}
+              onDoubleClick={() => {
+                if (!isRollingBack) startEdit();
+              }}
+              className="min-w-0 flex-1 text-sm whitespace-pre-wrap text-sidebar-foreground"
+            >
+              {message.content}
+            </span>
+            <div className="-mr-1.5 flex shrink-0 items-center gap-1">
+              {affectedCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setConfirm("restore")}
+                      disabled={isRollingBack}
+                      aria-label="Restore to here"
+                      className={ACTION_BUTTON}
+                    >
+                      <Undo2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Restore chat and file to this point
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={startEdit}
+                    disabled={isRollingBack}
+                    aria-label="Edit message"
+                    className={ACTION_BUTTON}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                  <TooltipContent>Edit message</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+          </div>
+        )}
       </div>
+
+      {confirm && (
+        <div
+          className={cn(
+            "absolute inset-x-0 z-40",
+            anchor === "top" ? "top-0" : "bottom-0",
+          )}
+        >
+          {/* Soft fade between the message and the popover so it dissolves in
+              instead of hitting a hard edge — below it when pinned to the top,
+              above it when pinned to the bottom. */}
+          {anchor === "bottom" && <FadeOverlay direction="up" />}
+          <RollbackConfirm
+            count={affectedCount}
+            mode={confirm}
+            onConfirm={handleConfirm}
+            onCancel={() => setConfirm(null)}
+          />
+          {anchor === "top" && <FadeOverlay direction="down" />}
+        </div>
+      )}
     </div>
   );
 }

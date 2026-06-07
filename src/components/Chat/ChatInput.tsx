@@ -1,7 +1,11 @@
 import { Button, Textarea } from "@/components/ui";
 import { ArrowUp, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { KeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
+import type {
+  KeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from "react";
 
 const MIN_LINES = 2;
 const MAX_LINES = 8;
@@ -12,6 +16,8 @@ interface ChatInputProps {
   isAgentWorking?: boolean;
   onInterrupt?: () => void;
   placeholder?: string;
+  /** Content pinned to the top edge of the composer, inside its border (e.g. errors). */
+  banner?: ReactNode;
 }
 
 export function ChatInput({
@@ -20,6 +26,7 @@ export function ChatInput({
   isAgentWorking = false,
   onInterrupt,
   placeholder = "Type a message...",
+  banner,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const [metrics, setMetrics] = useState({ lineHeight: 20, padding: 8 });
@@ -91,6 +98,7 @@ export function ChatInput({
 
   return (
     <div className="mb-3 mx-3 relative">
+      {banner && <div className="mb-2">{banner}</div>}
       <div
         onMouseDown={focusTextarea}
         className="flex flex-col border border-input-border bg-secondary rounded-lg focus-within:border-input-border-focus transition-colors cursor-text"
@@ -111,12 +119,12 @@ export function ChatInput({
             <Button
               key="stop"
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onInterrupt}
-              className="bg-accent-hover text-foreground hover:bg-accent-hover"
+              aria-label="Stop"
+              className="rounded-full p-1.5 bg-accent-hover text-foreground hover:bg-accent-hover"
             >
-              <Square className="h-3 w-3 fill-current" />
-              Stop
+              <Square className="h-4 w-4" />
             </Button>
           ) : (
             <Button
@@ -126,6 +134,7 @@ export function ChatInput({
               onClick={handleSubmit}
               disabled={!canSend}
               aria-label="Send"
+              className="rounded-full p-1.5"
             >
               <ArrowUp className="h-4 w-4" strokeWidth={1.75} />
             </Button>

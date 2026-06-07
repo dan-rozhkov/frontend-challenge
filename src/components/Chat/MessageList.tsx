@@ -3,12 +3,10 @@ import { useAutoScroll } from "@/hooks/useAutoScroll";
 import type {
   AgentTextMessage,
   ChatMessage,
-  ErrorMessage as ErrorMessageType,
   ToolOperationMessage as ToolOperationMessageType,
 } from "@/types/chat";
 import { useCallback, useEffect, useRef } from "react";
 import { AgentMessage } from "./AgentMessage";
-import { ErrorMessage } from "./ErrorMessage";
 import { FeedbackForm } from "./FeedbackForm";
 import { ToolOperationMessage } from "./ToolOperationMessage";
 import { UserMessage } from "./UserMessage";
@@ -154,29 +152,23 @@ export function MessageList({
       }
       case "user":
         return <UserMessage message={message} />;
-      case "error":
-        return (
-          <div className="mx-3 min-w-0 overflow-hidden">
-            <ErrorMessage message={message as ErrorMessageType} />
-          </div>
-        );
       default:
         return null;
     }
   };
 
-  const renderMessages = () => {
+  // Render a turn's body (everything after its user message), grouping
+  // consecutive tool operations into a single collapsible block.
+  const renderBody = (bodyMessages: ChatMessage[]) => {
     const elements: React.ReactNode[] = [];
     let toolCallGroup: ChatMessage[] = [];
 
     const flushToolCallGroup = () => {
       if (toolCallGroup.length > 0) {
+        const group = toolCallGroup;
         elements.push(
-          <div
-            key={`tool-group-${toolCallGroup[0].id}`}
-            className="space-y-2 min-w-0"
-          >
-            {toolCallGroup.map((msg) => (
+          <div key={`tool-group-${group[0].id}`} className="space-y-2 min-w-0">
+            {group.map((msg) => (
               <div key={msg.id} id={`message-${msg.id}`}>
                 {renderMessage(msg)}
               </div>
@@ -187,8 +179,9 @@ export function MessageList({
       }
     };
 
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
+    for (const message of bodyMessages) {
+      // Errors are surfaced at the composer (see App → ComposerErrors), not here.
+      if (message.type === "error") continue;
 
       if (isToolCallMessage(message)) {
         toolCallGroup.push(message);
@@ -205,6 +198,29 @@ export function MessageList({
 
     flushToolCallGroup();
     return elements;
+  };
+
+  // Split the flat message list into turns. A turn is a user message (its
+  // sticky header) plus every agent/tool/error message that follows it, up to
+  // the next user message. Messages before the first user message (e.g. an
+  // opening agent greeting) form a leading turn with no header.
+  type Turn = { key: string; header: ChatMessage | null; body: ChatMessage[] };
+  const buildTurns = (): Turn[] => {
+    const turns: Turn[] = [];
+    let current: Turn | null = null;
+    for (const message of messages) {
+      if (message.type === "user") {
+        if (current) turns.push(current);
+        current = { key: message.id, header: message, body: [] };
+      } else {
+        if (!current) {
+          current = { key: `lead-${message.id}`, header: null, body: [] };
+        }
+        current.body.push(message);
+      }
+    }
+    if (current) turns.push(current);
+    return turns;
   };
 
   if (messages.length === 0) {
@@ -231,13 +247,36 @@ export function MessageList({
   return (
     <div className="relative flex-1 w-full min-w-0 min-h-0 flex flex-col overflow-hidden">
       <ScrollArea ref={scrollAreaRef} className="flex-1 w-full min-w-0 min-h-0">
-        <div className="px-3 pt-4 pb-40 space-y-3 flex flex-col overflow-hidden">
-          {renderMessages()}
-          {showWorkingIndicator && (
-            <div className="mx-3 min-w-0">
-              <WorkingIndicator />
-            </div>
-          )}
+        <div className="px-3 pt-1 pb-40 flex flex-col min-w-0">
+          {buildTurns().map((turn, index, turns) => {
+            const isLastTurn = index === turns.length - 1;
+            const showIndicatorHere = isLastTurn && showWorkingIndicator;
+            return (
+              <section
+                key={turn.key}
+                className="flex flex-col min-w-0 pt-3"
+              >
+                {turn.header && (
+                  <div
+                    id={`message-${turn.header.id}`}
+                    className="min-w-0 mb-3"
+                  >
+                    {renderMessage(turn.header)}
+                  </div>
+                )}
+                {(turn.body.length > 0 || showIndicatorHere) && (
+                  <div className="space-y-3 min-w-0">
+                    {renderBody(turn.body)}
+                    {showIndicatorHere && (
+                      <div className="mx-3 min-w-0">
+                        <WorkingIndicator />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       </ScrollArea>
       <ScrollToBottomButton

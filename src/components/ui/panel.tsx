@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 interface PanelProps extends HTMLAttributes<HTMLDivElement> {
   /** Invoked when Escape is pressed anywhere inside the panel. */
   onClose?: () => void;
+  /** Play the light entrance animation on mount. Defaults to true. */
+  animated?: boolean;
 }
 
 /**
@@ -14,7 +16,7 @@ interface PanelProps extends HTMLAttributes<HTMLDivElement> {
  * and Escape-to-close; colors and padding can be overridden via `className`.
  */
 const Panel = forwardRef<HTMLDivElement, PanelProps>(
-  ({ className, onClose, onKeyDown, ...props }, ref) => (
+  ({ className, onClose, onKeyDown, animated = true, ...props }, ref) => (
     <div
       ref={ref}
       onKeyDown={(e) => {
@@ -26,6 +28,7 @@ const Panel = forwardRef<HTMLDivElement, PanelProps>(
       }}
       className={cn(
         "flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-2.5",
+        animated && "animate-panel-in",
         className,
       )}
       {...props}

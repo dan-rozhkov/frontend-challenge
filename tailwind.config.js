@@ -89,11 +89,21 @@ module.exports = {
           from: { opacity: "1", transform: "scale(1)" },
           to: { opacity: "0", transform: "scale(0.96)" },
         },
+        "error-in": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "panel-in": {
+          from: { opacity: "0", transform: "translateY(4px) scale(0.98)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
       },
       animation: {
         shimmer: "shimmer 2s linear infinite",
         "tooltip-in": "tooltip-in 120ms ease-out",
         "tooltip-out": "tooltip-out 100ms ease-in forwards",
+        "error-in": "error-in 180ms ease-out",
+        "panel-in": "panel-in 150ms ease-out",
       },
     },
   },

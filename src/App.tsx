@@ -1,15 +1,22 @@
-import { ChatInput, MessageList } from "@/components/Chat";
+import { ChatInput, ComposerErrors, MessageList } from "@/components/Chat";
 import { ChatHeader } from "@/components/Chat/ChatHeader";
 import { MockEditor } from "@/components/Editor";
 import { TooltipProvider } from "@/components/ui";
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
+import type { ErrorMessage } from "@/types/chat";
 
 export default function App() {
   const messages = useChatStore((s) => s.messages);
   const isAgentWorking = useChatStore((s) => s.isAgentWorking);
   const isRollingBack = useChatStore((s) => s.isRollingBack);
   const { handleSubmit, handleInterrupt } = useChatActions();
+
+  // Errors are lifted out of the scrolling list and pinned to the top of the
+  // composer, where the next action happens — so a failure can't scroll away.
+  const errors = messages.filter(
+    (m): m is ErrorMessage => m.type === "error",
+  );
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -27,6 +34,9 @@ export default function App() {
             onInterrupt={handleInterrupt}
             disabled={isRollingBack}
             placeholder={isRollingBack ? "Reverting…" : undefined}
+            banner={
+              errors.length > 0 ? <ComposerErrors errors={errors} /> : undefined
+            }
           />
         </div>
 

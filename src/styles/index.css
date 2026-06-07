@@ -137,6 +137,16 @@ body,
   padding: 0;
 }
 
+/*
+ * Allow `position: sticky` inside the Radix ScrollArea viewport. Radix wraps
+ * its children in a `display: table` div, which would otherwise become the
+ * sticky containing block and stop sticky message headers from pinning to the
+ * scroll viewport. `min-width: 100%` is set inline, so it survives this.
+ */
+[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

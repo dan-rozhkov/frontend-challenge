@@ -2,7 +2,7 @@ import { Button, Panel } from "@/components/ui";
 import { useChatActions } from "@/hooks/useChatActions";
 import { describeError } from "@/lib/error-messages";
 import type { ErrorMessage as ErrorMessageType } from "@/types/chat";
-import { AlertCircle, RotateCcw } from "lucide-react";
+import { XCircle } from "lucide-react";
 
 interface ErrorMessageProps {
   message: ErrorMessageType;
@@ -23,9 +23,9 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
   return (
     <Panel role="alert">
       <div className="flex items-start gap-2">
-        <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
+        <XCircle className="mt-0.5 h-4 w-4 shrink-0 fill-destructive text-muted" />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-destructive">{title}</p>
+          <p className="text-sm">{title}</p>
           <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
             {description}
           </p>
@@ -44,9 +44,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
             variant="secondary"
             size="sm"
             onClick={() => retryError(message)}
-            className="font-medium"
           >
-            <RotateCcw className="h-3 w-3" />
             Retry
           </Button>
         )}

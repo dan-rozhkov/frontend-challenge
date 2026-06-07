@@ -6,6 +6,8 @@ export { RollbackConfirm } from "./RollbackConfirm";
 export { AgentMessage } from "./AgentMessage";
 export { ToolOperationMessage } from "./ToolOperationMessage";
 export { ErrorMessage } from "./ErrorMessage";
+export { ComposerErrors } from "./ComposerErrors";
 export { FeedbackForm } from "./FeedbackForm";
 export { WorkingIndicator } from "./WorkingIndicator";
 export { ScrollToBottomButton } from "./ScrollToBottomButton";
+export { FadeOverlay } from "./FadeOverlay";

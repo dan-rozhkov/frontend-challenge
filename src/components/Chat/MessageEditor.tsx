@@ -52,6 +52,7 @@ export function MessageEditor({
   return (
     <Panel
       onClose={onCancel}
+      animated={false}
       className="border-input-border-focus bg-secondary p-2"
     >
       <Textarea
@@ -70,7 +71,7 @@ export function MessageEditor({
           Cancel
         </Button>
         <Button
-          variant="primary"
+          variant="secondary"
           size="sm"
           onClick={submit}
           disabled={!canSave}

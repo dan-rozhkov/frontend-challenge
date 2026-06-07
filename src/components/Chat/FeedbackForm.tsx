@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   Button,
   Panel,
@@ -9,12 +8,49 @@ import {
 } from "@/components/ui";
 import { useChatStore } from "@/stores/chat-store";
 import type { MessageFeedback } from "@/types/chat";
-import { ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface FeedbackFormProps {
   messageId: string;
   currentFeedback?: MessageFeedback;
+}
+
+const RATING_LABEL = {
+  positive: "Good response",
+  negative: "Bad response",
+} as const;
+
+/** A tooltipped thumb up/down toggle, shared by the quick row and the comment panel. */
+function ThumbButton({
+  rating,
+  onClick,
+  className,
+  iconSize = "h-3 w-3",
+}: {
+  rating: "positive" | "negative";
+  onClick: () => void;
+  className?: string;
+  iconSize?: string;
+}) {
+  const Icon = rating === "positive" ? ThumbsUp : ThumbsDown;
+  const label = RATING_LABEL[rating];
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClick}
+          aria-label={label}
+          className={className}
+        >
+          <Icon className={iconSize} />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
 }
 
 /**
@@ -71,46 +107,16 @@ export function FeedbackForm({
     }
   };
 
-  if (currentFeedback && !showInput) {
-    return (
-      <div className="flex items-center gap-1 mt-2">
-        <span className="text-xs text-muted-foreground">Feedback:</span>
-        {currentFeedback === "positive" ? (
-          <ThumbsUp className="h-3 w-3 text-success" />
-        ) : (
-          <ThumbsDown className="h-3 w-3 text-destructive" />
-        )}
-      </div>
-    );
-  }
+  // Selection is conveyed by brightness, not colour: the chosen thumb stays at
+  // full opacity while the other fades back. With nothing chosen, both are full.
+  const thumbTone = (rating: MessageFeedback) =>
+    selectedRating && selectedRating !== rating
+      ? "opacity-30 hover:opacity-60"
+      : "opacity-100";
 
   if (showInput) {
     return (
-      <Panel onClose={handleClose} className="mt-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {selectedRating === "positive" ? (
-              <ThumbsUp className="h-3 w-3 text-success" />
-            ) : (
-              <ThumbsDown className="h-3 w-3 text-destructive" />
-            )}
-            <span>Add feedback</span>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleClose}
-                aria-label="Close"
-                className="p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Close</TooltipContent>
-          </Tooltip>
-        </div>
+      <Panel onClose={handleClose} animated={false} className="mt-2">
         <div className="rounded-lg border border-input-border bg-secondary focus-within:border-input-border-focus transition-colors">
           <Textarea
             ref={textareaRef}
@@ -124,44 +130,25 @@ export function FeedbackForm({
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedRating("positive")}
-                  aria-label="Good response"
-                  className={cn(
-                    selectedRating === "positive" &&
-                      "bg-success/20 text-success hover:bg-success/20 hover:text-success",
-                  )}
-                >
-                  <ThumbsUp className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Good response</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedRating("negative")}
-                  aria-label="Bad response"
-                  className={cn(
-                    selectedRating === "negative" &&
-                      "bg-destructive/20 text-destructive hover:bg-destructive/20 hover:text-destructive",
-                  )}
-                >
-                  <ThumbsDown className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Bad response</TooltipContent>
-            </Tooltip>
+            <ThumbButton
+              rating="positive"
+              onClick={() => setSelectedRating("positive")}
+              className={thumbTone("positive")}
+            />
+            <ThumbButton
+              rating="negative"
+              onClick={() => setSelectedRating("negative")}
+              className={thumbTone("negative")}
+            />
           </div>
-          <Button variant="secondary" size="sm" onClick={handleSubmitWithText}>
-            Send
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button variant="ghost" size="sm" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleSubmitWithText}>
+              Send
+            </Button>
+          </div>
         </div>
       </Panel>
     );
@@ -169,34 +156,18 @@ export function FeedbackForm({
 
   return (
     <div className="flex items-center gap-1 mt-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleQuickFeedback("positive")}
-            aria-label="Good response"
-            className="hover:text-success"
-          >
-            <ThumbsUp className="h-3.5 w-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Good response</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleQuickFeedback("negative")}
-            aria-label="Bad response"
-            className="hover:text-destructive"
-          >
-            <ThumbsDown className="h-3.5 w-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Bad response</TooltipContent>
-      </Tooltip>
+      <ThumbButton
+        rating="positive"
+        onClick={() => handleQuickFeedback("positive")}
+        className={thumbTone("positive")}
+        iconSize="h-3.5 w-3.5"
+      />
+      <ThumbButton
+        rating="negative"
+        onClick={() => handleQuickFeedback("negative")}
+        className={thumbTone("negative")}
+        iconSize="h-3.5 w-3.5"
+      />
       <Button
         variant="link"
         size="sm"
