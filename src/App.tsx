@@ -33,7 +33,13 @@ export default function App() {
             isAgentWorking={isAgentWorking}
             onInterrupt={handleInterrupt}
             disabled={isRollingBack}
-            placeholder={isRollingBack ? "Reverting…" : undefined}
+            placeholder={
+              isRollingBack
+                ? "Reverting…"
+                : isAgentWorking
+                  ? "Agent is working…"
+                  : undefined
+            }
             banner={
               errors.length > 0 ? <ComposerErrors errors={errors} /> : undefined
             }
