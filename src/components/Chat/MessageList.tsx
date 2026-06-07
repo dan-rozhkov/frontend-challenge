@@ -106,10 +106,18 @@ export function MessageList({
       } else {
         onContentAdded();
       }
+    } else if (currentCount < prevCount) {
+      // A rollback truncated the thread. The content shrinks, which makes the
+      // browser clamp scrollTop and fire a synthetic scroll that would
+      // otherwise unpin auto-scroll (leaving a phantom "New messages" pill on
+      // the resend). The restored message is the new end of the thread, so snap
+      // to the bottom and re-pin. Count-driven so collapsing a tool group — also
+      // a shrink, but not a truncation — doesn't trigger it.
+      scrollToBottom();
     }
 
     prevMessageCountRef.current = currentCount;
-  }, [messages.length, onContentAdded, onUserMessageSent]);
+  }, [messages.length, onContentAdded, onUserMessageSent, scrollToBottom]);
 
   useEffect(() => {
     if (isAgentWorking) {

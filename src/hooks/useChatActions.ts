@@ -158,6 +158,28 @@ export function useChatActions() {
       const store = useChatStore.getState();
       if (store.isRollingBack) return false;
 
+      // Nothing after this message means there is nothing to roll back: no
+      // history to truncate and no later edit_file to undo. Skip the backend
+      // rollback (and its "Reverting…" loader + ~5s delay) entirely. An edit
+      // here is just "replace the text and resend"; a bare restore is a no-op.
+      const index = store.messages.findIndex((m) => m.id === messageId);
+      if (index === -1) return false;
+      const hasMessagesAfter = index < store.messages.length - 1;
+      if (!hasMessagesAfter) {
+        if (options.resendText !== undefined) {
+          // Interrupt any in-flight stream before replacing + resending.
+          if (store.isAgentWorking && store.abortController) {
+            store.abortController.abort();
+            await safeStopAgent();
+          }
+          useChatStore
+            .getState()
+            .updateUserMessageContent(messageId, options.resendText);
+          await runAgent();
+        }
+        return true;
+      }
+
       // Show the loader immediately, before any await, so there is no flash.
       store.setRollingBack(messageId);
 
