@@ -15,9 +15,9 @@ There is no test runner configured; "tests" in the app are mocked (see below). T
 
 ## What this is
 
-A **mocked AI coding agent sandbox** used to evaluate Design Engineer candidates. It is intentionally a frontend-only app: a chat panel (left) and a mock code editor (right), with no real backend. `docs/DEVELOPMENT.md` is the candidate-facing brief and describes the evaluation tasks (UI/UX review, designing rollback/edit flows, then implementing them). The message-edit + file-rollback flow is now implemented (see `useChatActions` / `UserMessage` below).
+A **mocked AI coding agent sandbox** — a frontend-only app: a chat panel (left) and a mock code editor (right), with no real backend. The agent's responses are a hardcoded script; the focus of this repo is the **message-edit + file-rollback flow** (see `useChatActions` / `UserMessage` below). `docs/DEVELOPMENT.md` has the dev-facing notes on the mock backend and components.
 
-**Intentional bugs exist by design.** Comments marked `INTENTIONAL BUG` flag these (e.g. no immediate loading indicator after send, now in `src/hooks/useChatActions.ts`; layout `min-w` issues in `src/App.tsx` that let the chat panel collapse). Do not "fix" these silently — they are evaluation material. Only touch them if the user explicitly asks.
+**Some pre-existing rough edges are left in on purpose**, outside the edit/rollback feature. Comments marked `INTENTIONAL BUG` flag them (e.g. no immediate loading indicator after send, in `src/hooks/useChatActions.ts`; layout `min-w` issues in `src/App.tsx` that let the chat panel collapse). They sit outside the feature scope — leave them unless explicitly asked.
 
 ## Architecture
 
@@ -44,4 +44,4 @@ The data flow is: **`useChatActions` orchestrates** (the hook owns the send/roll
 
 ## Deployment
 
-`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on push to `main`. The Vite `base` is `/qure-frontend-challenge/` — keep that in mind for any absolute asset paths.
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on push to `main`. The Vite `base` is `/frontend-challenge/` (must match the repo name) — keep that in mind for any absolute asset paths.

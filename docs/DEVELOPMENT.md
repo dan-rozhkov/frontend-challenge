@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a mocked AI coding agent sandbox designed for evaluating Design Engineer candidates. The application simulates a coding assistant with a chat interface on the left and a mock code editor on the right.
+This is a mocked AI coding agent sandbox. The application simulates a coding assistant with a chat interface on the left and a mock code editor on the right.
 
 ## Getting Started
 
@@ -107,22 +107,3 @@ Key color tokens:
 3. **Types**: Define explicit types for all data structures
 4. **Styling**: Use Tailwind utilities, avoid inline styles
 5. **Error Handling**: Always handle async errors gracefully
-
-## Candidate Evaluation Tasks
-
-### Part 1: UI/UX Review (Interview)
-
-- Identify UI issues and inconsistencies
-- Suggest UX improvements
-- Review error handling and edge cases
-
-### Part 2: Feature Design (Interview)
-
-- Design rollback behavior (restore chat + file state)
-- Design message editing flow
-- Consider edge cases and state management
-
-### Part 3: Implementation (Home Task)
-
-- Implement the designed rollback/editing feature
-- Write clean, maintainable code

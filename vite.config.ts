@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/qure-frontend-challenge/",
+  base: "/frontend-challenge/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
