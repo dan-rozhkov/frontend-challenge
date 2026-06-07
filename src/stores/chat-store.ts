@@ -10,6 +10,7 @@ interface ChatState {
   fileContent: string[];
   isAgentWorking: boolean;
   abortController: AbortController | null;
+  rollbackController: AbortController | null;
   responseIndex: number;
   isRollingBack: boolean;
   rollbackTargetId: string | null;
@@ -24,6 +25,7 @@ interface ChatState {
   updateFileContent: (content: string[]) => void;
   setAgentWorking: (working: boolean) => void;
   setAbortController: (controller: AbortController | null) => void;
+  setRollbackController: (controller: AbortController | null) => void;
   setMessageFeedback: (
     messageId: string,
     feedback: MessageFeedback,
@@ -56,6 +58,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   fileContent: [],
   isAgentWorking: false,
   abortController: null,
+  rollbackController: null,
   responseIndex: 0,
   isRollingBack: false,
   rollbackTargetId: null,
@@ -93,6 +96,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setAbortController: (controller) => {
     set({ abortController: controller });
+  },
+
+  setRollbackController: (controller) => {
+    set({ rollbackController: controller });
   },
 
   setMessageFeedback: (messageId, feedback, feedbackText) => {

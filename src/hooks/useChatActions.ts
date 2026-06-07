@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import {
   getToolDisplayName,
   getToolTarget,
@@ -39,9 +39,6 @@ async function safeStopAgent(): Promise<void> {
  * already mutated those values — the resend then starts from the right point.
  */
 export function useChatActions() {
-  // Controller for the in-flight rollback, so the loader can cancel the ~5s wait.
-  const rollbackControllerRef = useRef<AbortController | null>(null);
-
   const runAgent = useCallback(async () => {
     const { setAbortController, setAgentWorking } = useChatStore.getState();
 
@@ -189,8 +186,11 @@ export function useChatActions() {
         await safeStopAgent();
       }
 
+      // The controller for the in-flight rollback lives in the store (not a
+      // per-hook ref) so the loader's Cancel works regardless of which hook
+      // instance started the rollback.
       const controller = new AbortController();
-      rollbackControllerRef.current = controller;
+      useChatStore.getState().setRollbackController(controller);
 
       try {
         const { fileContent } = await rollbackToMessage(
@@ -230,7 +230,7 @@ export function useChatActions() {
         );
         return false;
       } finally {
-        rollbackControllerRef.current = null;
+        useChatStore.getState().setRollbackController(null);
       }
     },
     [runAgent],
@@ -238,7 +238,7 @@ export function useChatActions() {
 
   /** Abort the in-flight rollback (the loader's Cancel). */
   const cancelRollback = useCallback(() => {
-    rollbackControllerRef.current?.abort();
+    useChatStore.getState().rollbackController?.abort();
   }, []);
 
   /** Dismiss a surfaced error and re-run the action that produced it. */

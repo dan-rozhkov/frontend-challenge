@@ -17,7 +17,7 @@ There is no test runner configured; "tests" in the app are mocked (see below). T
 
 A **mocked AI coding agent sandbox** — a frontend-only app: a chat panel (left) and a mock code editor (right), with no real backend. The agent's responses are a hardcoded script; the focus of this repo is the **message-edit + file-rollback flow** (see `useChatActions` / `UserMessage` below). `docs/DEVELOPMENT.md` has the dev-facing notes on the mock backend and components.
 
-**Some pre-existing rough edges are left in on purpose**, outside the edit/rollback feature. Comments marked `INTENTIONAL BUG` flag them (e.g. no immediate loading indicator after send, in `src/hooks/useChatActions.ts`; layout `min-w` issues in `src/App.tsx` that let the chat panel collapse). They sit outside the feature scope — leave them unless explicitly asked.
+The focus of any work here is the edit/rollback feature; treat unrelated rough edges as out of scope and leave them unless explicitly asked.
 
 ## Architecture
 

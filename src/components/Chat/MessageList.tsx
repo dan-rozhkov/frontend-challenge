@@ -71,7 +71,12 @@ export function MessageList({
     onUserMessageSent,
   } = useAutoScroll({ threshold: 100 });
 
-  const prevMessageCountRef = useRef(messages.length);
+  // Errors are pulled out of the list and pinned to the composer (see App), so
+  // adding/removing one mustn't drive the list's auto-scroll. Track only the
+  // count of messages that actually render here.
+  const visibleMessages = messages.filter((m) => m.type !== "error");
+  const visibleCount = visibleMessages.length;
+  const prevMessageCountRef = useRef(visibleCount);
 
   const scrollAreaRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -97,10 +102,10 @@ export function MessageList({
     }
 
     const prevCount = prevMessageCountRef.current;
-    const currentCount = messages.length;
+    const currentCount = visibleCount;
 
     if (currentCount > prevCount) {
-      const lastMessage = messages[messages.length - 1];
+      const lastMessage = visibleMessages[visibleMessages.length - 1];
       if (lastMessage?.type === "user") {
         onUserMessageSent();
       } else {
@@ -117,7 +122,7 @@ export function MessageList({
     }
 
     prevMessageCountRef.current = currentCount;
-  }, [messages.length, onContentAdded, onUserMessageSent, scrollToBottom]);
+  }, [visibleCount, onContentAdded, onUserMessageSent, scrollToBottom]);
 
   useEffect(() => {
     if (isAgentWorking) {
