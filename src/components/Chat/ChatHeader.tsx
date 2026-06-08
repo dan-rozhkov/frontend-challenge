@@ -5,7 +5,10 @@ import { useCallback } from "react";
 
 export function ChatHeader() {
   const clearMessages = useChatStore((s) => s.clearMessages);
-  const messagesCount = useChatStore((s) => s.messages.length);
+  // Boolean, not the count: the "New Chat" button only cares whether the thread
+  // is empty, so the header re-renders on the 0↔non-empty flip instead of on
+  // every new message.
+  const hasMessages = useChatStore((s) => s.messages.length > 0);
 
   const handleNewChat = useCallback(() => {
     clearMessages();
@@ -19,7 +22,7 @@ export function ChatHeader() {
           AI Coding Agent
         </span>
       </div>
-      {messagesCount > 0 && (
+      {hasMessages && (
         <Button
           variant="ghost"
           size="sm"

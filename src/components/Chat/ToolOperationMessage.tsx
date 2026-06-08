@@ -1,7 +1,7 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import type { ToolOperationStatus } from "@/types/chat";
 import { ShimmerText } from "@/components/ui";
 
@@ -40,7 +40,10 @@ function DetailText({
   return <span className={DETAIL_CLASS}>{children}</span>;
 }
 
-export function ToolOperationMessage({
+// Memoized: props are primitives plus `args`/`result`, whose references stay
+// stable while the message is unchanged (`updateToolStatus` spreads only the
+// matching message). Only the operation whose status actually flips re-renders.
+export const ToolOperationMessage = memo(function ToolOperationMessage({
   displayName,
   target,
   status = "running",
@@ -101,4 +104,4 @@ export function ToolOperationMessage({
       )}
     </Collapsible.Root>
   );
-}
+});

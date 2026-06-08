@@ -4,19 +4,18 @@ import { MockEditor } from "@/components/Editor";
 import { TooltipProvider } from "@/components/ui";
 import { useChatActions } from "@/hooks/useChatActions";
 import { useChatStore } from "@/stores/chat-store";
-import type { ErrorMessage } from "@/types/chat";
 
 export default function App() {
-  const messages = useChatStore((s) => s.messages);
   const isAgentWorking = useChatStore((s) => s.isAgentWorking);
   const isRollingBack = useChatStore((s) => s.isRollingBack);
-  const { handleSubmit, handleInterrupt } = useChatActions();
-
-  // Errors are lifted out of the scrolling list and pinned to the top of the
-  // composer, where the next action happens — so a failure can't scroll away.
-  const errors = messages.filter(
-    (m): m is ErrorMessage => m.type === "error",
+  // App must NOT subscribe to the whole `messages` array — that would re-render
+  // it (and the header + composer below) on every new message. The list reads
+  // `messages` itself; here we only need a boolean to gate the error banner. The
+  // banner's actual error list is subscribed inside ComposerErrors.
+  const hasErrors = useChatStore((s) =>
+    s.messages.some((m) => m.type === "error"),
   );
+  const { handleSubmit, handleInterrupt } = useChatActions();
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -27,7 +26,7 @@ export default function App() {
         */}
         <div className="w-[30%] min-w-[320px] flex flex-col bg-sidebar border-r border-sidebar-border">
           <ChatHeader />
-          <MessageList messages={messages} isAgentWorking={isAgentWorking} />
+          <MessageList isAgentWorking={isAgentWorking} />
           <ChatInput
             onSubmit={handleSubmit}
             isAgentWorking={isAgentWorking}
@@ -40,9 +39,7 @@ export default function App() {
                   ? "Agent is working…"
                   : undefined
             }
-            banner={
-              errors.length > 0 ? <ComposerErrors errors={errors} /> : undefined
-            }
+            banner={hasErrors ? <ComposerErrors /> : undefined}
           />
         </div>
 

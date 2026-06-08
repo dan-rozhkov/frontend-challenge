@@ -9,7 +9,7 @@ import {
 import { useChatStore } from "@/stores/chat-store";
 import type { MessageFeedback } from "@/types/chat";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 interface FeedbackFormProps {
   messageId: string;
@@ -58,7 +58,9 @@ function ThumbButton({
  * add a comment. The comment field is a multi-line textarea (Enter submits,
  * Shift+Enter inserts a newline) so longer feedback is easy to type.
  */
-export function FeedbackForm({
+// Memoized: props are primitives, so unchanged feedback targets don't re-render
+// while the agent streams new messages.
+export const FeedbackForm = memo(function FeedbackForm({
   messageId,
   currentFeedback,
 }: FeedbackFormProps) {
@@ -178,4 +180,4 @@ export function FeedbackForm({
       </Button>
     </div>
   );
-}
+});

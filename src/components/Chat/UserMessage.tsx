@@ -10,13 +10,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui";
 import { Pencil, Undo2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { MessageEditor } from "./MessageEditor";
 import { RollbackConfirm } from "./RollbackConfirm";
 import { FadeOverlay } from "./FadeOverlay";
 
 interface UserMessageProps {
   message: UserMessageType;
+  /**
+   * How many messages follow this one — the count a rollback would discard.
+   * Passed down from `MessageList` (which already knows each message's position)
+   * so this component doesn't have to subscribe to the whole `messages` array
+   * just to compute it, which would re-render every user message on every tick.
+   */
+  affectedCount: number;
 }
 
 type Confirm = "restore" | "edit" | null;
@@ -34,11 +41,15 @@ const ACTION_BUTTON =
  * `useChatActions`. The edit draft is kept locally so a failed rollback can
  * reopen the editor without losing the typed text.
  */
-export function UserMessage({ message }: UserMessageProps) {
+export const UserMessage = memo(function UserMessage({
+  message,
+  affectedCount,
+}: UserMessageProps) {
   const { handleRestore, handleEditSubmit, cancelRollback } = useChatActions();
-  const messages = useChatStore((s) => s.messages);
   const isRollingBack = useChatStore((s) => s.isRollingBack);
-  const rollbackTargetId = useChatStore((s) => s.rollbackTargetId);
+  // Narrow boolean selector: flips only for the message actually being rolled
+  // back, so the other user messages don't re-render during a rollback.
+  const isReverting = useChatStore((s) => s.rollbackTargetId === message.id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(message.content);
@@ -64,10 +75,6 @@ export function UserMessage({ message }: UserMessageProps) {
     ro.observe(textEl);
     return () => ro.disconnect();
   }, [textEl, message.content]);
-
-  const index = messages.findIndex((m) => m.id === message.id);
-  const affectedCount = index === -1 ? 0 : messages.length - (index + 1);
-  const isReverting = rollbackTargetId === message.id;
 
   const startEdit = () => {
     setDraft(message.content);
@@ -220,4 +227,4 @@ export function UserMessage({ message }: UserMessageProps) {
       )}
     </div>
   );
-}
+});

@@ -1,11 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
+import { useChatStore } from "@/stores/chat-store";
 import type {
   AgentTextMessage,
   ChatMessage,
   ToolOperationMessage as ToolOperationMessageType,
 } from "@/types/chat";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { AgentMessage } from "./AgentMessage";
 import { FeedbackForm } from "./FeedbackForm";
 import { ToolOperationMessage } from "./ToolOperationMessage";
@@ -14,7 +15,6 @@ import { ScrollToBottomButton } from "./ScrollToBottomButton";
 import { WorkingIndicator } from "./WorkingIndicator";
 
 interface MessageListProps {
-  messages: ChatMessage[];
   isAgentWorking?: boolean;
 }
 
@@ -59,10 +59,11 @@ function feedbackTargetIds(
   return ids;
 }
 
-export function MessageList({
-  messages,
-  isAgentWorking = false,
-}: MessageListProps) {
+export function MessageList({ isAgentWorking = false }: MessageListProps) {
+  // Subscribed here rather than passed from App, so a new message re-renders the
+  // list without dragging the header and composer along with it.
+  const messages = useChatStore((s) => s.messages);
+
   const {
     setContainer,
     hasUnseenMessages,
@@ -74,7 +75,10 @@ export function MessageList({
   // Errors are pulled out of the list and pinned to the composer (see App), so
   // adding/removing one mustn't drive the list's auto-scroll. Track only the
   // count of messages that actually render here.
-  const visibleMessages = messages.filter((m) => m.type !== "error");
+  const visibleMessages = useMemo(
+    () => messages.filter((m) => m.type !== "error"),
+    [messages],
+  );
   const visibleCount = visibleMessages.length;
   const prevMessageCountRef = useRef(visibleCount);
 
@@ -130,7 +134,21 @@ export function MessageList({
     }
   }, [isAgentWorking, onContentAdded]);
 
-  const feedbackTargets = feedbackTargetIds(messages, isAgentWorking);
+  const feedbackTargets = useMemo(
+    () => feedbackTargetIds(messages, isAgentWorking),
+    [messages, isAgentWorking],
+  );
+
+  // Per user-message count of how many messages follow it (what a rollback would
+  // discard). Computed once here instead of having each UserMessage subscribe to
+  // the whole array and run its own findIndex.
+  const affectedCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    messages.forEach((m, i) => {
+      if (m.type === "user") counts.set(m.id, messages.length - (i + 1));
+    });
+    return counts;
+  }, [messages]);
 
   const renderMessage = (message: ChatMessage) => {
     switch (message.type) {
@@ -164,7 +182,12 @@ export function MessageList({
         );
       }
       case "user":
-        return <UserMessage message={message} />;
+        return (
+          <UserMessage
+            message={message}
+            affectedCount={affectedCounts.get(message.id) ?? 0}
+          />
+        );
       default:
         return null;
     }
@@ -218,12 +241,12 @@ export function MessageList({
   // the next user message. Messages before the first user message (e.g. an
   // opening agent greeting) form a leading turn with no header.
   type Turn = { key: string; header: ChatMessage | null; body: ChatMessage[] };
-  const buildTurns = (): Turn[] => {
-    const turns: Turn[] = [];
+  const turns = useMemo<Turn[]>(() => {
+    const result: Turn[] = [];
     let current: Turn | null = null;
     for (const message of messages) {
       if (message.type === "user") {
-        if (current) turns.push(current);
+        if (current) result.push(current);
         current = { key: message.id, header: message, body: [] };
       } else {
         if (!current) {
@@ -232,9 +255,9 @@ export function MessageList({
         current.body.push(message);
       }
     }
-    if (current) turns.push(current);
-    return turns;
-  };
+    if (current) result.push(current);
+    return result;
+  }, [messages]);
 
   if (messages.length === 0) {
     return (
@@ -261,7 +284,7 @@ export function MessageList({
     <div className="relative flex-1 w-full min-w-0 min-h-0 flex flex-col overflow-hidden">
       <ScrollArea ref={scrollAreaRef} className="flex-1 w-full min-w-0 min-h-0">
         <div className="px-3 pt-1 pb-40 flex flex-col min-w-0">
-          {buildTurns().map((turn, index, turns) => {
+          {turns.map((turn, index, turns) => {
             const isLastTurn = index === turns.length - 1;
             const showIndicatorHere = isLastTurn && showWorkingIndicator;
             return (

@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface MarkdownProps {
@@ -7,7 +8,14 @@ interface MarkdownProps {
   className?: string;
 }
 
-export function Markdown({ content, className }: MarkdownProps) {
+// Memoized: react-markdown re-parses the content on every render, which is the
+// single most expensive thing in the message list. Props are primitives, so the
+// default shallow comparison keeps unchanged messages from re-parsing on every
+// agent tick.
+export const Markdown = memo(function Markdown({
+  content,
+  className,
+}: MarkdownProps) {
   return (
     <div
       className={cn(
@@ -23,4 +31,4 @@ export function Markdown({ content, className }: MarkdownProps) {
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
-}
+});
